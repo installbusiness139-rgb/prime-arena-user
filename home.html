@@ -42,7 +42,7 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 <body>
 <div class="topbar">
 <div class="topbar-left">
-<img src="images/logo.png" class="logo-small" alt="Logo">
+<img src="images/logo.png" class="logo-small" alt="Logo" onerror="this.style.display='none'">
 <div>
 <div class="welcome-text">Welcome Back,</div>
 <div class="username" id="userName">PLAYER</div>
@@ -119,7 +119,7 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
@@ -160,25 +160,20 @@ const userDocSnap = await getDoc(userDocRef);
 if (userDocSnap.exists()) {
 var data = userDocSnap.data();
 var balance = data.balance || 0;
-
 balanceEl.textContent = balance;
 balanceEl.classList.remove('loading');
-
 user.balance = balance;
 try {
 localStorage.setItem('primeArenaUser', JSON.stringify(user));
 } catch(e) {}
-
 firstLoadDone = true;
 } else {
-// User not found - show 0
 balanceEl.textContent = '0';
 balanceEl.classList.remove('loading');
 firstLoadDone = true;
 }
 } catch (error) {
 console.error("Error loading balance:", error);
-// If load fails but we haven't shown anything yet, show 0
 if (!firstLoadDone) {
 balanceEl.textContent = '0';
 balanceEl.classList.remove('loading');
@@ -188,7 +183,24 @@ firstLoadDone = true;
 }
 
 loadUserBalance();
+
+// ============ REAL-TIME BAN CHECK ============
+const userRef = doc(db, "users", user.id);
+onSnapshot(userRef, function(snapshot) {
+if (snapshot.exists()) {
+var data = snapshot.data();
+if (data.isBlocked === true) {
+try {
+localStorage.removeItem('primeArenaUser');
+sessionStorage.clear();
+} catch(e) {}
+alert('Your account has been blocked by admin. Please contact support.');
+window.location.replace('login.html');
+}
+}
+});
+
 setInterval(loadUserBalance, 5000);
 </script>
 </body>
-</html>
+  </html>
