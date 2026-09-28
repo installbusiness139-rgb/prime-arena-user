@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Transactions - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0e27;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      padding-bottom: 80px;
+      min-height: 100vh;
+    }
+    
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: #0d1230;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 15px;
+    }
+    
+    .back-btn {
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .topbar-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #1a1f3a;
+      border-bottom: 1px solid #2a2f4a;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab.active {
+      color: #ffa500;
+      border-bottom: 3px solid #ffa500;
+    }
+    
+    /* Transaction List */
+    .tx-list {
+      padding: 15px;
+    }
+    
+    .tx-card {
+      background: #1a1f3a;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-left: 4px solid #00c853;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .tx-card.debit {
+      border-left-color: #ff3131;
+    }
+    
+    .tx-card.pending {
+      border-left-color: #ffa500;
+    }
+    
+    .tx-left {
+      flex: 1;
+    }
+    
+    .tx-type {
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 5px;
+    }
+    
+    .tx-id {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 3px;
+    }
+    
+    .tx-date {
+      font-size: 11px;
+      color: #666;
+    }
+    
+    .tx-right {
+      text-align: right;
+    }
+    
+    .tx-amount {
+      font-size: 18px;
+      font-weight: bold;
+      color: #00c853;
+      margin-bottom: 3px;
+    }
+    
+    .tx-amount.debit {
+      color: #ff3131;
+    }
+    
+    .tx-amount.pending {
+      color: #ffa500;
+    }
+    
+    .tx-status {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: #00c853;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .tx-status.pending {
+      background: #ffa500;
+      color: #0a0e27;
+    }
+    
+    .tx-status.failed {
+      background: #ff3131;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    
+    .empty-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    
+    .empty-text {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+    
+    .empty-subtext {
+      font-size: 12px;
+      color: #444;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1230;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #2a2f4a;
+      z-index: 100;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      color: #666;
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+    
+    .nav-item.active {
+      color: #ffa500;
+    }
+    
+    .nav-icon {
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="back-btn" onclick="window.location.href='wallet.html'">←</div>
+    <div class="topbar-title">MY TRANSACTION</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" id="walletTab" onclick="switchTab('wallet')">Wallet Transaction</div>
+    <div class="tab" id="withdrawTab" onclick="switchTab('withdraw')">Withdraw</div>
+  </div>
+
+  <!-- Transaction List -->
+  <div class="tx-list" id="txList">
+    <!-- Transactions will be loaded here from Firebase -->
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='tournaments.html'">
+      <span class="nav-icon">🎮</span>
+      <span>Tournaments</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='home.html'">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href='wallet.html'">
+      <span class="nav-icon">💰</span>
+      <span>Wallet</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script>
+    var currentTab = 'wallet';
+    
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      document.getElementById('walletTab').classList.remove('active');
+      document.getElementById('withdrawTab').classList.remove('active');
+      
+      if (tab === 'wallet') {
+        document.getElementById('walletTab').classList.add('active');
+      } else {
+        document.getElementById('withdrawTab').classList.add('active');
+      }
+      
+      loadTransactions();
+    }
+    
+    function loadTransactions() {
+      // For now, show empty state
+      // Later, we will fetch real data from Firebase
+      
+      var txList = document.getElementById('txList');
+      
+      txList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-text">There Are No Transactions Currently.</div>
+          <div class="empty-subtext">Check Back In Some Time...</div>
+        </div>
+      `;
+    }
+    
+    // Load on page start
+    loadTransactions();
+  </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ - Prime Arena</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #0a0e27; 
+      color: white; 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      min-height: 100vh; 
+    }
+    
+    .back-btn { 
+      font-size: 24px; 
+      color: white; 
+      margin-bottom: 20px; 
+      cursor: pointer; 
+      display: inline-block; 
+    }
+    .header { 
+      margin-bottom: 25px; 
+      border-bottom: 1px solid #2a2f4a;
+      padding-bottom: 15px;
+    }
+    .header h1 { 
+      font-size: 26px; 
+      font-weight: bold; 
+      color: #ffa500;
+      letter-spacing: 1px;
+    }
+
+    /* लोडिंग स्टेट */
+    .loading-state {
+      text-align: center;
+      color: #ffa500;
+      font-size: 15px;
+      padding: 30px 0;
+      display: none;
+    }
+
+    /* FAQ आइटम्स का डिज़ाइन */
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .faq-item {
+      background: #1a1f3a;
+      border: 1px solid #2a2f4a;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-question {
+      padding: 16px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .faq-question:hover {
+      background: #202645;
+    }
+
+    .faq-icon {
+      color: #ffa500;
+      font-size: 22px;
+      font-weight: bold;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background: #0f1423;
+      color: #b0b5c9;
+      font-size: 14px;
+      line-height: 1.6;
+      border-top: 1px solid transparent;
+    }
+
+    .faq-answer p {
+      padding: 0 18px 16px 18px;
+      margin: 0;
+    }
+
+    .faq-item.active {
+      border-color: #ffa500;
+      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.1);
+    }
+    .faq-item.active .faq-answer {
+      border-top: 1px solid #2a2f4a;
+    }
+    .faq-item.active .faq-icon {
+      transform: rotate(45deg); 
+      color: #ffffff;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="back-btn" onclick="window.location.href='profile.html'">←</div>
+  
+  <div class="header">
+    <h1>❓ Frequently Asked Questions</h1>
+  </div>
+
+  <!-- लोडिंग मैसेज -->
+  <div class="loading-state" id="loadingState">⏳ Loading FAQs...</div>
+
+  <!-- FAQ लिस्ट यहाँ डायनामिकली लोड होगी -->
+  <div class="faq-container" id="faqContainer">
+    <!-- JavaScript इसे भरेगा -->
+  </div>
+
+  <div class="footer">
+    &copy; 2024 Prime Arena. All rights reserved.
+  </div>
+
+  <script>
+    // Firebase Configuration (आपकी पुरानी वाली)
+    var firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementId: "G-EQJP1D9C92"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    var db = firebase.firestore();
+
+    // 1. Firebase से FAQ डेटा लोड करना
+    document.addEventListener("DOMContentLoaded", function() {
+      var container = document.getElementById('faqContainer');
+      var loading = document.getElementById('loadingState');
+      
+      loading.style.display = 'block';
+
+      // 'faqs' कलेक्शन से डेटा उठाएं (createdAt के हिसाब से सॉर्ट करें)
+      db.collection("faqs").orderBy("createdAt", "asc").get().then(function(snapshot) {
+        loading.style.display = 'none';
+        
+        if (snapshot.empty) {
+          container.innerHTML = "<p style='text-align:center; color:#aaa; padding:20px;'>No FAQs available right now.</p>";
+          return;
+        }
+
+        snapshot.forEach(function(doc) {
+          var data = doc.data();
+          
+          var faqHTML = `
+            <div class="faq-item">
+              <div class="faq-question" onclick="toggleFaq(this)">
+                <span>${data.question}</span>
+                <span class="faq-icon">+</span>
+              </div>
+              <div class="faq-answer">
+                <p>${data.answer}</p>
+              </div>
+            </div>
+          `;
+          container.innerHTML += faqHTML;
+        });
+
+      }).catch(function(error) {
+        loading.style.display = 'none';
+        console.error("Error fetching FAQs: ", error);
+        container.innerHTML = "<p style='text-align:center; color:#ff3131; padding:20px;'>Error loading FAQs. Please check your internet connection.</p>";
+      });
+    });
+
+    // 2. FAQ खोलने और बंद करने का लॉजिक
+    function toggleFaq(element) {
+      const allItems = document.querySelectorAll('.faq-item');
+      
+      allItems.forEach(item => {
+        if (item !== element.parentElement) {
+          item.classList.remove('active');
+          var ans = item.querySelector('.faq-answer');
+          if(ans) ans.style.maxHeight = null;
+        }
+      });
+
+      const parent = element.parentElement;
+      const answer = element.nextElementSibling;
+      
+      parent.classList.toggle('active');
+
+      if (parent.classList.contains('active')) {
+        answer.style.maxHeight = answer.scrollHeight + "px";
+      } else {
+        answer.style.maxHeight = null;
+      }
+    }
+  </script>
+
+</body>
+</html>

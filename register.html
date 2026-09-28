@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0e27; color: white; font-family: Arial, sans-serif; padding: 20px; min-height: 100vh; }
+    .back-btn { font-size: 24px; color: white; margin-bottom: 20px; cursor: pointer; display: inline-block; }
+    .header { margin-bottom: 25px; }
+    .header h1 { font-size: 28px; font-weight: bold; line-height: 1.3; }
+    .header h1 span { color: #ffa500; }
+    .form-group { margin-bottom: 15px; }
+    .form-group input { width: 100%; padding: 14px; background: #1a1f3a; border: 1px solid #2a2f4a; border-radius: 10px; color: white; font-size: 15px; outline: none; }
+    .form-group input:focus { border-color: #ffa500; }
+    .form-group input::placeholder { color: #666; }
+    .referral-box { display: flex; gap: 10px; margin-bottom: 8px; }
+    .referral-box input { flex: 1; }
+    .apply-btn { padding: 14px 20px; background: #6a1b9a; border: none; border-radius: 10px; color: white; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .apply-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .referral-status { font-size: 12px; margin-bottom: 15px; padding: 10px 12px; border-radius: 8px; line-height: 1.4; display: none; }
+    .referral-status.success { background: rgba(0,200,83,0.15); color: #00c853; border: 1px solid #00c853; display: block; }
+    .referral-status.error { background: rgba(255,49,49,0.15); color: #ff3131; border: 1px solid #ff3131; display: block; }
+    .help-link { text-align: right; margin-bottom: 20px; }
+    .help-link a { color: #ffa500; text-decoration: none; font-size: 14px; }
+    .signup-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ff6b00, #ffa500); border: none; border-radius: 10px; color: white; font-size: 18px; font-weight: bold; cursor: pointer; margin-bottom: 25px; letter-spacing: 1px; }
+    .signup-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .login-link { text-align: center; color: #ccc; font-size: 15px; }
+    .login-link a { color: #ffa500; text-decoration: none; font-weight: bold; }
+    .error-msg { color: #ff3131; font-size: 13px; margin-top: 5px; display: none; }
+    .fullscreen-success { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0a0e27; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; text-align: center; padding: 30px; }
+    .fullscreen-success .check { font-size: 80px; margin-bottom: 20px; }
+    .fullscreen-success .text { font-size: 20px; color: #00c853; font-weight: bold; margin-bottom: 10px; }
+    .fullscreen-success .subtext { font-size: 14px; color: #ccc; }
+    .loading-msg { color: #ffa500; font-size: 14px; text-align: center; margin-bottom: 15px; display: none; }
+
+    /* ================= CUSTOM POPUP CSS START ================= */
+    .popup-overlay {
+      display: none; 
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.8); 
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(3px);
+    }
+    .popup-box {
+      background: #0f121d; 
+      border: 1px solid #d4af37; 
+      border-radius: 12px;
+      padding: 25px 20px;
+      width: 85%;
+      max-width: 350px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      font-family: inherit;
+    }
+    .popup-box h3 {
+      color: #fca311; 
+      margin-top: 0;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .popup-box p {
+      color: #ffffff;
+      font-size: 15px;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+    .popup-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    .popup-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-transform: uppercase;
+    }
+    .popup-btn-cancel {
+      background: #2a2d3e;
+      color: #ffffff;
+    }
+    .popup-btn-confirm {
+      background: #10b981; 
+      color: #ffffff;
+    }
+    .popup-btn:active {
+      transform: scale(0.95);
+    }
+    /* ================= CUSTOM POPUP CSS END ================= */
+  </style>
+</head>
+<body>
+  <div class="back-btn" onclick="window.location.href='login.html'">←</div>
+  
+  <div class="header">
+    <h1>Create new,<br><span>Account</span></h1>
+  </div>
+
+  <div class="loading-msg" id="loadingMsg">⏳ Creating your account, please wait...</div>
+
+  <form id="registerForm">
+    <div class="form-group">
+      <input type="text" id="firstName" placeholder="First Name">
+      <div class="error-msg" id="firstError">Please enter your first name</div>
+    </div>
+    
+    <div class="form-group">
+      <input type="text" id="lastName" placeholder="Last Name">
+    </div>
+    
+    <div class="form-group">
+      <input type="tel" id="phone" placeholder="Phone Number" maxlength="10">
+      <div class="error-msg" id="phoneError">Please enter a valid 10-digit phone number</div>
+    </div>
+    
+    <div class="form-group">
+      <input type="email" id="email" placeholder="Email">
+      <div class="error-msg" id="emailError">Please enter a valid email</div>
+    </div>
+    
+    <div class="form-group">
+      <input type="password" id="password" placeholder="Password (min 6 characters)">
+      <div class="error-msg" id="passError">Password must be at least 6 characters</div>
+    </div>
+    
+    <div class="referral-box">
+      <input type="text" id="referral" placeholder="Referral code (optional)" style="text-transform: uppercase;">
+      <button type="button" class="apply-btn" id="applyBtn" onclick="applyReferral()">APPLY</button>
+    </div>
+    <div class="referral-status" id="referralStatus"></div>
+    
+    <div class="help-link">
+      <a href="contact.html">Need help?</a>
+    </div>
+
+    <button type="submit" class="signup-btn" id="signupBtn">SIGN UP</button>
+  </form>
+
+  <div class="login-link">
+    Already have an account? <a href="login.html">LOGIN</a>
+  </div>
+
+  <!-- Fullscreen Success Overlay -->
+  <div class="fullscreen-success" id="fullscreenSuccess">
+    <div class="check">✅</div>
+    <div class="text">Account Created Successfully!</div>
+    <div class="subtext">Redirecting to Home...</div>
+  </div>
+
+  <!-- ================= CUSTOM POPUP HTML START ================= -->
+  <div id="customPopupModal" class="popup-overlay">
+    <div class="popup-box">
+      <h3 id="popupTitle">Title</h3>
+      <p id="popupMessage">Message goes here.</p>
+      <div class="popup-buttons">
+        <button id="popupCancelBtn" class="popup-btn popup-btn-cancel">CANCEL</button>
+        <button id="popupConfirmBtn" class="popup-btn popup-btn-confirm">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+  <!-- ================= CUSTOM POPUP HTML END ================= -->
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementId: "G-EQJP1D9C92"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+
+    var verifiedReferrerId = null;
+    var verifiedReferralCode = '';
+
+    /* ================= CUSTOM POPUP JS START ================= */
+    function showPopup(title, message, isConfirm = true) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('customPopupModal');
+        const titleEl = document.getElementById('popupTitle');
+        const msgEl = document.getElementById('popupMessage');
+        const cancelBtn = document.getElementById('popupCancelBtn');
+        const confirmBtn = document.getElementById('popupConfirmBtn');
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+
+        // अगर सिर्फ Alert है (OK वाला), तो Cancel बटन छिपा दें
+        cancelBtn.style.display = isConfirm ? 'block' : 'none';
+
+        modal.style.display = 'flex';
+
+        // पुराने इवेंट्स हटाने के लिए क्लोनिंग तकनीक
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+        newCancelBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+          resolve(false);
+        });
+
+        newConfirmBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+          resolve(true);
+        });
+      });
+    }
+    /* ================= CUSTOM POPUP JS END ================= */
+
+    function applyReferral() {
+      var code = document.getElementById('referral').value.trim().toUpperCase();
+      var statusEl = document.getElementById('referralStatus');
+      var applyBtn = document.getElementById('applyBtn');
+      
+      if (!code) {
+        statusEl.className = 'referral-status error';
+        statusEl.textContent = '❌ Please enter a referral code';
+        return;
+      }
+      
+      applyBtn.disabled = true;
+      applyBtn.textContent = 'CHECKING...';
+      statusEl.className = 'referral-status';
+      statusEl.textContent = '⏳ Checking...';
+      
+      db.collection("users").where("referralCode", "==", code).get().then(function(snap) {
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'APPLY';
+        
+        if (snap.empty) {
+          verifiedReferrerId = null;
+          verifiedReferralCode = '';
+          statusEl.className = 'referral-status error';
+          statusEl.textContent = '❌ Invalid referral code. Please check and try again.';
+        } else {
+          var referrerDoc = snap.docs[0];
+          verifiedReferrerId = referrerDoc.id;
+          verifiedReferralCode = code;
+          var referrerName = referrerDoc.data().name || 'User';
+          statusEl.className = 'referral-status success';
+          statusEl.textContent = '✅ Valid code! Referred by: ' + referrerName;
+        }
+      }).catch(function(error) {
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'APPLY';
+        statusEl.className = 'referral-status error';
+        statusEl.textContent = '❌ Error: ' + error.message;
+      });
+    }
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      var firstName = document.getElementById('firstName').value.trim();
+      var lastName = document.getElementById('lastName').value.trim();
+      var phone = document.getElementById('phone').value.trim();
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+      var referral = document.getElementById('referral').value.trim().toUpperCase();
+      
+      if (!firstName) {
+        document.getElementById('firstError').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('firstError').style.display = 'none';
+      }
+      
+      if (!phone || phone.length !== 10) {
+        document.getElementById('phoneError').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('phoneError').style.display = 'none';
+      }
+      
+      if (!email || !email.includes('@')) {
+        document.getElementById('emailError').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('emailError').style.display = 'none';
+      }
+      
+      if (!password || password.length < 6) {
+        document.getElementById('passError').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('passError').style.display = 'none';
+      }
+      
+      document.getElementById('loadingMsg').style.display = 'block';
+      document.getElementById('signupBtn').disabled = true;
+      
+      // Check email exists
+      db.collection("users").where("email", "==", email).get().then(function(emailSnap) {
+        if (!emailSnap.empty) {
+          // यहाँ alert को बदलकर custom popup लगा दिया है
+          showPopup("Error!", "This email is already registered. Please login.", false);
+          document.getElementById('loadingMsg').style.display = 'none';
+          document.getElementById('signupBtn').disabled = false;
+          return Promise.reject('email_exists');
+        }
+        return db.collection("users").where("phone", "==", phone).get();
+      }).then(function(phoneSnap) {
+        if (phoneSnap && !phoneSnap.empty) {
+          // यहाँ alert को बदलकर custom popup लगा दिया है
+          showPopup("Error!", "This phone number is already registered. Please login.", false);
+          document.getElementById('loadingMsg').style.display = 'none';
+          document.getElementById('signupBtn').disabled = false;
+          return Promise.reject('phone_exists');
+        }
+        
+        var newReferralCode = 'CXA' + Math.floor(1000 + Math.random() * 9000);
+        
+        var referrerPromise = Promise.resolve(verifiedReferrerId);
+        if (referral && !verifiedReferrerId) {
+          referrerPromise = db.collection("users").where("referralCode", "==", referral).get().then(function(snap) {
+            if (!snap.empty) {
+              return snap.docs[0].id;
+            }
+            return null;
+          });
+        }
+        
+        return referrerPromise.then(function(referrerId) {
+          var userData = {
+            firstName: firstName,
+            lastName: lastName,
+            name: firstName + ' ' + lastName,
+            phone: phone,
+            email: email,
+            password: password,
+            referralCode: newReferralCode,
+            referredBy: referrerId || '',
+            referredByCode: referral || '',
+            referralBonusGiven: false,
+            balance: 0,
+            deposited: 0,
+            winning: 0,
+            bonus: 0,
+            matchesPlayed: 0,
+            totalKills: 0,
+            totalWins: 0,
+            ffIgn: '',
+            ffUid: '',
+            isBlocked: false,
+            createdAt: new Date().toISOString()
+          };
+          
+          return db.collection("users").add(userData).then(function(docRef) {
+            return { id: docRef.id, data: userData };
+          });
+        });
+      }).then(function(result) {
+        // SAVE to localStorage (Auto-Login)
+        localStorage.setItem('primeArenaUser', JSON.stringify({
+          id: result.id,
+          name: result.data.name,
+          email: result.data.email,
+          phone: result.data.phone,
+          balance: 0,
+          winning: 0,
+          deposited: 0,
+          bonus: 0
+        }));
+        
+        // Show fullscreen success
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('fullscreenSuccess').style.display = 'flex';
+        
+        // IMMEDIATE REDIRECT - multiple methods
+        setTimeout(function() {
+          window.location.replace('home.html');
+        }, 500);
+        
+        setTimeout(function() {
+          window.location.href = 'home.html';
+        }, 1000);
+        
+        setTimeout(function() {
+          document.location = 'home.html';
+        }, 1500);
+        
+      }).catch(function(error) {
+        if (error === 'email_exists' || error === 'phone_exists') return;
+        // यहाँ alert को बदलकर custom popup लगा दिया है
+        showPopup("Error!", "Something went wrong: " + error.message, false);
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('signupBtn').disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>

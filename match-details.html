@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Match - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-height:100vh}
+.tb{display:flex;align-items:center;padding:15px;background:#0d1230;border-bottom:1px solid #2a2f4a;position:sticky;top:0;z-index:100;gap:15px}
+.bk{font-size:24px;cursor:pointer}
+.tt{font-size:16px;font-weight:bold}
+.wrap{padding:15px}
+.bn{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#ff6b00,#ffa500);border-radius:12px;overflow:hidden;margin-bottom:15px;position:relative}
+.bn img{width:100%;height:100%;object-fit:cover}
+.bnp{width:100%;height:100%;display:flex;justify-content:center;align-items:center;font-size:60px;color:#0a0e27}
+.sb{position:absolute;top:10px;right:10px;background:#00c853;font-size:10px;padding:5px 12px;border-radius:10px;font-weight:bold;text-transform:uppercase}
+.mt{font-size:20px;font-weight:bold;margin-bottom:5px}
+.mi{font-size:12px;color:#666;margin-bottom:15px}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
+.ii{background:#1a1f3a;border-radius:10px;padding:12px;border:1px solid #2a2f4a}
+.il{font-size:10px;color:#666;margin-bottom:3px}
+.iv{font-size:15px;color:#ffa500;font-weight:bold}
+.pz{background:#1a1f3a;border-radius:12px;padding:15px;margin-bottom:15px;border:1px solid #ffa500}
+.pt{font-size:14px;color:#ffa500;font-weight:bold;margin-bottom:10px}
+.pr{display:flex;justify-content:space-between;font-size:13px;padding:6px 0}
+.pa{color:#00c853;font-weight:bold}
+.rb{background:#1a1f3a;border-radius:12px;padding:15px;margin-bottom:15px;border:1px solid #2a2f4a}
+.rt{font-size:14px;color:#ffa500;font-weight:bold;margin-bottom:10px}
+.rx{font-size:12px;color:#ccc;line-height:1.6;white-space:pre-line}
+.jc{position:fixed;bottom:60px;left:0;right:0;padding:12px 15px;background:linear-gradient(to top,#0a0e27 70%,rgba(10,14,39,0));z-index:200}
+.report-btn{width:100%;padding:12px;background:linear-gradient(135deg,#ff3131,#ff5252);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;margin-bottom:10px;box-shadow:0 4px 15px rgba(255,49,49,.3)}
+.jb{width:100%;padding:18px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:12px;color:#fff;font-size:17px;font-weight:bold;cursor:pointer;box-shadow:0 4px 15px rgba(0,200,83,.3)}
+.jb:disabled{opacity:.5}
+.jb.joined{background:linear-gradient(135deg,#0088cc,#00aaff)}
+.jb.full{background:linear-gradient(135deg,#666,#888)}
+.tst{position:fixed;bottom:220px;left:50%;transform:translateX(-50%);background:#00c853;color:#fff;padding:12px 25px;border-radius:25px;font-size:13px;font-weight:bold;display:none;z-index:2000;max-width:90%;text-align:center}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a2f4a;z-index:250}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#666;font-size:11px;padding:5px 10px}
+.ni.active{color:#ffa500}
+.nicon{font-size:22px}
+.smo{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:5000;justify-content:center;align-items:center;padding:15px}
+.smo.show{display:flex}
+.smb{background:#0f121d;border:1px solid #ffa500;border-radius:15px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding:18px}
+.smh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.smt{font-size:16px;font-weight:bold;color:#ffa500}
+.smc{font-size:22px;cursor:pointer;line-height:1}
+.lg{display:flex;gap:15px;font-size:11px;color:#ccc;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid #2a2f4a}
+.lg span{display:flex;align-items:center;gap:5px}
+.d{display:inline-block;width:10px;height:10px;border-radius:3px}
+.d.g{background:#10b981}
+.d.r{background:#2a2f4a;border:1px solid #ff3131}
+.d.b{background:#0088cc}
+.sg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:15px}
+.sbtn{aspect-ratio:1/1;background:#10b981;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:bold;cursor:pointer;display:flex;justify-content:center;align-items:center;padding:2px}
+.sbtn.booked{background:#2a2f4a;color:#ff3131;cursor:not-allowed;border:1px solid #ff3131}
+.sbtn.selected{background:#ffa500;color:#0a0e27;transform:scale(1.1);box-shadow:0 0 10px rgba(255,165,0,.6)}
+.sbtn.yours{background:#0088cc}
+.pf{background:#0a0e27;border:1px solid #ffa500;border-radius:10px;padding:14px;margin-bottom:12px;display:none}
+.pf.show{display:block}
+.pft{font-size:12px;color:#ffa500;font-weight:bold;margin-bottom:12px;text-align:center}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:10px;color:#aaa;margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:11px;background:#0a0e27;border:1px solid #2a2f4a;border-radius:8px;color:#fff;font-size:13px;outline:none;font-family:inherit}
+.fg textarea{resize:vertical;min-height:70px}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#ffa500}
+.fg input.error{border-color:#ff3131}
+.smf{border-top:1px solid #2a2f4a;padding-top:12px}
+.ssi{font-size:13px;color:#ccc;margin-bottom:10px;text-align:center}
+.ssi b{color:#ffa500}
+.scb{width:100%;padding:15px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer}
+.scb:disabled{background:#2a2f4a;color:#666}
+.err{padding:20px;background:#2a1010;border:1px solid #ff3131;border-radius:10px;margin:15px}
+.err b{color:#ff3131;display:block;margin-bottom:8px}
+.err div{color:#ccc;font-size:12px;line-height:1.5}
+.err button{margin-top:12px;padding:10px 20px;background:#ff3131;color:#fff;border:none;border-radius:8px;font-weight:bold}
+.info-badge{background:rgba(255,165,0,.15);border:1px solid #ffa500;border-radius:8px;padding:10px 12px;font-size:11px;color:#ffa500;margin-bottom:12px;line-height:1.5}
+.upload-box{background:#0a0e27;border:2px dashed #2a2f4a;border-radius:10px;padding:18px;text-align:center;cursor:pointer;margin-bottom:10px;transition:.2s}
+.upload-box:active{border-color:#ffa500;background:#1a1f3a}
+.upload-box .uicon{font-size:32px;margin-bottom:6px}
+.upload-box .utext{font-size:12px;color:#ffa500;font-weight:bold}
+.upload-box .usub{font-size:10px;color:#666;margin-top:3px}
+.preview-box{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:10px;margin-bottom:10px;display:none;position:relative}
+.preview-box.show{display:block}
+.preview-box img{width:100%;max-height:200px;object-fit:contain;border-radius:6px}
+.preview-box .remove-img{position:absolute;top:5px;right:5px;background:#ff3131;color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;font-weight:bold;cursor:pointer;line-height:1}
+.optional-tag{font-size:9px;color:#666;font-weight:normal;margin-left:4px}
+.required-tag{font-size:9px;color:#ff3131;font-weight:normal;margin-left:4px}
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:99999}
+.loading-overlay.show{display:flex}
+.spinner{width:60px;height:60px;border:5px solid #1a1f3a;border-top-color:#ffa500;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:#ffa500;font-size:14px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="tb">
+<div class="bk" onclick="location.href='tournaments.html'">←</div>
+<div class="tt">MATCH DETAILS</div>
+</div>
+
+<div class="wrap" id="wrap">
+<div style="text-align:center;padding:60px 20px;color:#666">
+<div style="font-size:60px;margin-bottom:15px;opacity:.5">⏳</div>
+<div>Loading...</div>
+</div>
+</div>
+
+<div class="jc" id="jc" style="display:none">
+<button class="report-btn" id="reportBtn" style="display:none;" onclick="openReportModal()">Report a Player</button>
+<button class="jb" id="jb" onclick="onJoin()">JOIN MATCH</button>
+</div>
+
+<div class="tst" id="tst">Success!</div>
+
+<div class="smo" id="smo">
+<div class="smb">
+<div class="smh">
+<div class="smt">SELECT YOUR SLOT</div>
+<div class="smc" onclick="closeSmo()">X</div>
+</div>
+<div class="lg">
+<span><span class="d g"></span> Available</span>
+<span><span class="d r"></span> Booked</span>
+<span><span class="d b"></span> Yours</span>
+</div>
+<div class="sg" id="sg"></div>
+
+<div class="pf" id="pf">
+<div class="pft">ENTER YOUR PLAYER DETAILS</div>
+<div class="fg">
+<label>FREE FIRE IGN (GAME ID)</label>
+<input type="text" id="ffIgn" placeholder="e.g. PRO_KILLER123" maxlength="20">
+</div>
+<div class="fg">
+<label>REAL NAME</label>
+<input type="text" id="realName" placeholder="e.g. Rahul Sharma" maxlength="40">
+</div>
+<div class="fg">
+<label>MOBILE NUMBER</label>
+<input type="tel" id="mobileNum" placeholder="10-digit mobile number" maxlength="10">
+</div>
+</div>
+
+<div class="smf">
+<div class="ssi" id="ssi">Tap a green slot to select</div>
+<button class="scb" id="scb" onclick="confirmSlot()" disabled>SELECT A SLOT FIRST</button>
+</div>
+</div>
+</div>
+
+<div class="smo" id="reportModal">
+<div class="smb">
+<div class="smh">
+<div class="smt">REPORT A PLAYER</div>
+<div class="smc" onclick="closeReportModal()">X</div>
+</div>
+<div class="info-badge">Report a player who is cheating or breaking rules. Provide proof (screenshot or video) if possible. False reports may lead to action against you.</div>
+
+<div class="fg">
+<label>SELECT SLOT TO REPORT</label>
+<select id="reportSlot"></select>
+</div>
+
+<div class="fg">
+<label>REASON</label>
+<select id="reportReason">
+<option value="">-- Select a reason --</option>
+<option value="Aimbot">Aimbot</option>
+<option value="Wallhack">Wallhack</option>
+<option value="Auto Headshot">Auto Headshot</option>
+<option value="Teaming">Teaming</option>
+<option value="Speed Hack">Speed Hack</option>
+<option value="Other">Other</option>
+</select>
+</div>
+
+<div class="fg">
+<label>DETAILS (optional)</label>
+<textarea id="reportDetails" placeholder="Describe what happened..."></textarea>
+</div>
+
+<div class="fg">
+<label>SCREENSHOT PROOF <span class="optional-tag">(optional, max 5MB)</span></label>
+<div class="upload-box" id="uploadBox" onclick="document.getElementById('reportImage').click()">
+<div class="uicon">📷</div>
+<div class="utext">Tap to Upload Screenshot</div>
+<div class="usub">JPG, PNG - Max 5MB</div>
+</div>
+<input type="file" id="reportImage" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+<div class="preview-box" id="previewBox">
+<button class="remove-img" onclick="removeImage()">×</button>
+<img id="previewImg" src="">
+</div>
+</div>
+
+<div class="fg">
+<label>VIDEO PROOF LINK <span class="optional-tag">(optional)</span></label>
+<input type="text" id="reportVideoLink" placeholder="Paste YouTube/Drive video link here...">
+</div>
+
+<div class="smf">
+<button class="scb" id="reportSubmitBtn" onclick="submitReport()" style="background:linear-gradient(135deg,#ff3131,#ff5252)">SUBMIT REPORT</button>
+</div>
+</div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+<div class="spinner"></div>
+<div class="loading-text" id="loadingText">Uploading...</div>
+</div>
+
+<div class="nav">
+<div class="ni active" onclick="location.href='tournaments.html'"><span class="nicon">🎮</span><span>Tournaments</span></div>
+<div class="ni" onclick="location.href='leaderboard.html'"><span class="nicon">🏆</span><span>Leaderboard</span></div>
+<div class="ni" onclick="location.href='home.html'"><span class="nicon">🏠</span><span>Home</span></div>
+<div class="ni" onclick="location.href='wallet.html'"><span class="nicon">💰</span><span>Wallet</span></div>
+<div class="ni" onclick="location.href='profile.html'"><span class="nicon">👤</span><span>Profile</span></div>
+</div><script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+var db,user,matchId,currentMatch,bookedSlots={},userSlot=null,selectedSlot=null,totalSlots=0;
+var reportImageData=null;
+
+function showErr(m){
+document.getElementById('wrap').innerHTML='<div class="err"><b>Error</b><div>'+m+'</div><button onclick="location.reload()">Retry</button></div>';
+}
+
+function showPop(title,msg,onOk,showCancel){
+var p=document.createElement('div');
+p.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:flex;justify-content:center;align-items:center;z-index:9999;padding:20px';
+var b=document.createElement('div');
+b.style.cssText='background:#1a1f3a;border-radius:15px;padding:25px;width:100%;max-width:350px;border:1px solid #ffa500';
+b.innerHTML='<div style="font-size:18px;font-weight:bold;color:#ffa500;margin-bottom:12px;text-align:center">'+title+'</div><div style="font-size:14px;color:#ccc;line-height:1.5;margin-bottom:20px;text-align:center">'+msg+'</div>';
+var row=document.createElement('div');row.style.cssText='display:flex;gap:10px';
+var ok=document.createElement('button');ok.textContent='OK';
+ok.style.cssText='flex:1;padding:14px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer';
+ok.onclick=function(){document.body.removeChild(p);if(onOk)onOk();};
+if(showCancel){
+var cc=document.createElement('button');cc.textContent='CANCEL';
+cc.style.cssText='flex:1;padding:14px;background:#2a2f4a;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer';
+cc.onclick=function(){document.body.removeChild(p);};
+ok.textContent='CONFIRM';
+row.appendChild(cc);
+}
+row.appendChild(ok);
+b.appendChild(row);
+p.appendChild(b);
+document.body.appendChild(p);
+}
+
+function showToast(msg,bg){
+var t=document.getElementById('tst');
+t.textContent=msg;
+t.style.background=bg||'#00c853';
+t.style.display='block';
+setTimeout(function(){t.style.display='none';t.style.background='#00c853';},3500);
+}
+
+function getSlots(m){
+if(m.totalSlots&&parseInt(m.totalSlots)>0)return parseInt(m.totalSlots);
+if(m.mode==='Solo')return 48;
+if(m.mode==='Duo')return 24;
+if(m.mode==='Squad')return 12;
+return 48;
+}
+
+function getMid(){
+var p=new URLSearchParams(location.search);
+var i=p.get('id');
+if(i)return i;
+try{i=localStorage.getItem('selectedMatchId');}catch(e){}
+return i;
+}
+
+function render(){
+var m=currentMatch;
+var bc=m.bannerUrl?'<img src="'+m.bannerUrl+'" onerror="this.style.display=\'none\'">':'<div class="bnp">GAME</div>';
+var rules=m.rules&&m.rules.trim()?'<div class="rb"><div class="rt">RULES AND REGULATIONS</div><div class="rx">'+m.rules+'</div></div>':'<div class="rb"><div class="rt">RULES AND REGULATIONS</div><div class="rx" style="color:#666">No rules specified for this match.</div></div>';
+var pz='';
+if(m.prizeType==='booyah'&&m.booyahPrize>0){
+pz='<div class="pz"><div class="pt">BOOYAH PRIZE</div><div class="pr"><span style="color:#ccc">Winner takes all</span><span class="pa">'+m.booyahPrize+' coins</span></div></div>';
+}else if(m.prizeType==='perkill'&&m.perKillPrize>0){
+pz='<div class="pz"><div class="pt">PER KILL PRIZE</div><div class="pr"><span style="color:#ccc">Per Kill</span><span class="pa">'+m.perKillPrize+' coins</span></div></div>';
+}
+var bc2=Object.keys(bookedSlots).length;
+var sc=bc2>=totalSlots?'#ff3131':'#00e676';
+var h='<div class="bn">'+bc+'<div class="sb">'+m.status+'</div></div>'+
+'<div class="mt">'+m.title+'</div>'+
+'<div class="mi">Match ID: #'+m.id.substring(0,8)+'</div>'+
+'<div class="ig">'+
+'<div class="ii"><div class="il">MODE</div><div class="iv">'+m.mode+'</div></div>'+
+'<div class="ii"><div class="il">MAP</div><div class="iv">'+m.map+'</div></div>'+
+'<div class="ii"><div class="il">ENTRY FEE</div><div class="iv">'+m.entryFee+' coins</div></div>'+
+'<div class="ii"><div class="il">PRIZE POOL</div><div class="iv">'+m.prizePool+' coins</div></div>'+
+'<div class="ii"><div class="il">DATE</div><div class="iv">'+(m.date||'TBA')+'</div></div>'+
+'<div class="ii"><div class="il">TIME</div><div class="iv">'+(m.time||'TBA')+'</div></div>'+
+'<div class="ii" style="grid-column:span 2"><div class="il">SLOTS FILLED</div><div class="iv" style="color:'+sc+'" id="scnt">'+bc2+' / '+totalSlots+'</div></div>'+
+'</div>'+pz+rules;
+document.getElementById('wrap').innerHTML=h;
+updateBtn();
+}
+
+function updateBtn(){
+var m=currentMatch;
+var b=document.getElementById('jb');
+var rb=document.getElementById('reportBtn');
+document.getElementById('jc').style.display='block';
+var c=Object.keys(bookedSlots).length;
+if(userSlot!==null){
+b.textContent='JOINED - YOUR SLOT #'+userSlot;
+b.className='jb joined';b.disabled=false;
+if(c>=2){rb.style.display='block';}else{rb.style.display='none';}
+return;
+}
+rb.style.display='none';
+if(c>=totalSlots){
+b.textContent='MATCH FULL';b.className='jb full';b.disabled=true;return;
+}
+if(m.status==='completed'){
+b.textContent='MATCH COMPLETED';b.className='jb full';b.disabled=true;return;
+}
+b.textContent='JOIN MATCH ('+m.entryFee+' Coins)';
+b.className='jb';b.disabled=false;
+}
+
+function loadSlots(){
+db.collection('matches').doc(matchId).collection('slots').get().then(function(s){
+bookedSlots={};userSlot=null;
+s.forEach(function(d){
+var dt=d.data();
+var n=parseInt(d.id);
+bookedSlots[n]=dt;
+if(dt.userId===user.id)userSlot=n;
+});
+var el=document.getElementById('scnt');
+if(el){
+var c=Object.keys(bookedSlots).length;
+el.textContent=c+' / '+totalSlots;
+el.style.color=c>=totalSlots?'#ff3131':'#00e676';
+}
+updateBtn();
+}).catch(function(e){console.warn('Slots err:',e.message);});
+}
+
+function loadMatch(){
+db.collection('matches').doc(matchId).get().then(function(d){
+if(!d.exists){showErr('Match not found!');return;}
+currentMatch=d.data();
+currentMatch.id=d.id;
+totalSlots=getSlots(currentMatch);
+render();
+loadSlots();
+}).catch(function(e){showErr('Load failed: '+e.message);});
+}
+
+function onJoin(){
+var m=currentMatch;
+if(userSlot!==null){showPop('Already Joined','You have booked Slot #'+userSlot+'.',null,false);return;}
+db.collection('users').doc(user.id).get().then(function(u){
+if(!u.exists){showPop('Error','User not found',null,false);return;}
+var bal=u.data().balance||0;
+if(bal<m.entryFee){showPop('Insufficient Balance','You have only '+bal+' coins.',null,false);return;}
+openSmo();
+});
+}
+
+function openSmo(){
+selectedSlot=null;
+var g=document.getElementById('sg');
+g.innerHTML='';
+for(var i=1;i<=totalSlots;i++){
+var btn=document.createElement('button');
+btn.className='sbtn';
+btn.textContent=i;
+btn.setAttribute('data-slot',i);
+if(bookedSlots[i]){
+if(bookedSlots[i].userId===user.id){btn.classList.add('yours');}
+else{btn.classList.add('booked');btn.textContent='X';}
+}else{
+btn.onclick=(function(n){return function(){selSlot(n);};})(i);
+}
+g.appendChild(btn);
+}
+document.getElementById('pf').classList.remove('show');
+document.getElementById('ssi').innerHTML='Tap a green slot to select';
+document.getElementById('scb').textContent='SELECT A SLOT FIRST';
+document.getElementById('scb').disabled=true;
+document.getElementById('smo').classList.add('show');
+}
+
+function closeSmo(){
+document.getElementById('smo').classList.remove('show');
+selectedSlot=null;
+}
+
+function selSlot(n){
+selectedSlot=n;
+document.querySelectorAll('.sbtn').forEach(function(e){e.classList.remove('selected');});
+var b=document.querySelector('.sbtn[data-slot="'+n+'"]');
+if(b)b.classList.add('selected');
+document.getElementById('pf').classList.add('show');
+document.getElementById('ssi').innerHTML='Selected Slot: <b>#'+n+'</b> - Fill player details below';
+document.getElementById('scb').textContent='CONFIRM SLOT #'+n+' ('+currentMatch.entryFee+' Coins)';
+document.getElementById('scb').disabled=false;
+var ign=document.getElementById('ffIgn');
+var rn=document.getElementById('realName');
+var mn=document.getElementById('mobileNum');
+ign.classList.remove('error');rn.classList.remove('error');mn.classList.remove('error');
+if(!ign.value && user.ffIgn) ign.value=user.ffIgn;
+if(!rn.value && user.name) rn.value=user.name;
+if(!mn.value && user.phone) mn.value=user.phone;
+setTimeout(function(){
+document.getElementById('pf').scrollIntoView({behavior:'smooth',block:'center'});
+},200);
+}
+
+function validatePlayerDetails(){
+var ign=document.getElementById('ffIgn').value.trim();
+var rn=document.getElementById('realName').value.trim();
+var mn=document.getElementById('mobileNum').value.trim();
+var ok=true;
+document.getElementById('ffIgn').classList.remove('error');
+document.getElementById('realName').classList.remove('error');
+document.getElementById('mobileNum').classList.remove('error');
+if(!ign||ign.length<3){document.getElementById('ffIgn').classList.add('error');ok=false;}
+if(!rn||rn.length<2){document.getElementById('realName').classList.add('error');ok=false;}
+if(!mn||mn.length!==10||!/^\d+$/.test(mn)){document.getElementById('mobileNum').classList.add('error');ok=false;}
+return ok;
+}
+
+function confirmSlot(){
+if(!selectedSlot){
+showPop('No Slot','Please select a slot first.',null,false);
+return;
+}
+if(!validatePlayerDetails()){
+showPop('Missing Info','Please fill all player details correctly. IGN (min 3 chars), Real Name (min 2 chars), Mobile (10 digits)',null,false);
+return;
+}
+var m=currentMatch;
+var n=selectedSlot;
+var ffIgn=document.getElementById('ffIgn').value.trim();
+var realName=document.getElementById('realName').value.trim();
+var mobileNum=document.getElementById('mobileNum').value.trim();
+var cb=document.getElementById('scb');
+cb.disabled=true;cb.textContent='BOOKING...';
+
+db.collection('matches').doc(m.id).collection('slots').doc(String(n)).get().then(function(sd){
+if(sd.exists){
+showPop('Slot Taken','This slot was just taken. Pick another.',null,false);
+closeSmo();loadSlots();return;
+}
+return db.collection('users').doc(user.id).get().then(function(ud){
+var bal=ud.data().balance||0;
+if(bal<m.entryFee){
+showPop('Insufficient Balance','Only '+bal+' coins.',null,false);
+cb.disabled=false;cb.textContent='CONFIRM SLOT #'+n;
+return;
+}
+var nb=bal-m.entryFee;
+return db.collection('users').doc(user.id).update({balance:nb})
+.then(function(){
+return db.collection('matches').doc(m.id).collection('slots').doc(String(n)).set({
+userId:user.id,
+userEmail:user.email,
+ffIgn:ffIgn,
+realName:realName,
+mobileNumber:mobileNum,
+joinedAt:new Date().toISOString()
+});
+})
+.then(function(){
+return db.collection('users').doc(user.id).update({
+ffIgn:ffIgn,
+phone:mobileNum
+});
+})
+.then(function(){
+return db.collection('matches').doc(m.id).update({
+joinedPlayers:firebase.firestore.FieldValue.increment(1)
+});
+})
+.then(function(){
+return db.collection('transactions').add({
+userId:user.id,type:'match_entry',amount:m.entryFee,
+status:'completed',matchId:m.id,matchTitle:m.title,
+slotNumber:n,ffIgn:ffIgn,realName:realName,mobileNumber:mobileNum,
+timestamp:new Date().toISOString()
+});
+})
+.then(function(){
+user.balance=nb;
+try{localStorage.setItem('primeArenaUser',JSON.stringify(user));}catch(e){}
+userSlot=n;
+bookedSlots[n]={userId:user.id,ffIgn:ffIgn,realName:realName,mobileNumber:mobileNum};
+closeSmo();
+render();
+showToast('Slot #'+n+' booked successfully!');
+});
+});
+}).catch(function(e){
+showPop('Error',e.message,null,false);
+cb.disabled=false;cb.textContent='CONFIRM SLOT #'+n;
+});
+}
+
+// ============ REPORT FUNCTIONS ============
+
+function openReportModal(){
+var sel=document.getElementById('reportSlot');
+sel.innerHTML='<option value="">-- Select Slot --</option>';
+var keys=Object.keys(bookedSlots).sort(function(a,b){return parseInt(a)-parseInt(b)});
+if(keys.length===0){
+showPop('No Players','No other players to report.',null,false);
+return;
+}
+var hasOther=false;
+keys.forEach(function(k){
+var s=bookedSlots[k];
+if(s.userId===user.id)return;
+hasOther=true;
+var label='Slot #'+k;
+if(s.ffIgn) label+=' - '+s.ffIgn;
+else if(s.realName) label+=' - '+s.realName;
+var opt=document.createElement('option');
+opt.value=k;
+opt.textContent=label;
+sel.appendChild(opt);
+});
+if(!hasOther){
+showPop('No Players','No other players to report.',null,false);
+return;
+}
+document.getElementById('reportReason').value='';
+document.getElementById('reportDetails').value='';
+document.getElementById('reportVideoLink').value='';
+removeImage();
+document.getElementById('reportSubmitBtn').disabled=false;
+document.getElementById('reportSubmitBtn').textContent='SUBMIT REPORT';
+document.getElementById('reportModal').classList.add('show');
+}
+
+function closeReportModal(){
+document.getElementById('reportModal').classList.remove('show');
+}
+
+function handleImageSelect(event){
+var file=event.target.files[0];
+if(!file)return;
+if(!file.type.startsWith('image/')){
+showPop('Error','Please select an image file.',null,false);
+return;
+}
+if(file.size>5*1024*1024){
+showPop('Image Too Large','Image must be under 5MB. Please select a smaller image.',null,false);
+return;
+}
+var reader=new FileReader();
+reader.onload=function(e){
+var img=new Image();
+img.onload=function(){
+var canvas=document.createElement('canvas');
+var maxW=400;
+var maxH=400;
+var w=img.width;
+var h=img.height;
+if(w>maxW||h>maxH){
+if(w>h){
+h=Math.round(h*maxW/w);
+w=maxW;
+}else{
+w=Math.round(w*maxH/h);
+h=maxH;
+}
+}
+canvas.width=w;
+canvas.height=h;
+var ctx=canvas.getContext('2d');
+ctx.drawImage(img,0,0,w,h);
+var compressed=canvas.toDataURL('image/jpeg',0.5);
+reportImageData=compressed;
+document.getElementById('previewImg').src=compressed;
+document.getElementById('previewBox').classList.add('show');
+document.getElementById('uploadBox').style.display='none';
+};
+img.src=e.target.result;
+};
+reader.readAsDataURL(file);
+}
+
+function removeImage(){
+reportImageData=null;
+document.getElementById('previewBox').classList.remove('show');
+document.getElementById('uploadBox').style.display='block';
+document.getElementById('reportImage').value='';
+}
+
+function submitReport(){
+var slot=document.getElementById('reportSlot').value;
+var reason=document.getElementById('reportReason').value;
+var details=document.getElementById('reportDetails').value.trim();
+var videoLink=document.getElementById('reportVideoLink').value.trim();
+
+if(!slot){showPop('Error','Please select a slot.',null,false);return;}
+if(!reason){showPop('Error','Please select a reason.',null,false);return;}
+
+var reportedPlayer=bookedSlots[slot]||{};
+
+db.collection('reports')
+.where('matchId','==',matchId)
+.where('reporterId','==',user.id)
+.where('reportedSlot','==',parseInt(slot))
+.get().then(function(snap){
+if(!snap.empty){
+showPop('Already Reported','You have already reported this player for this match.',null,false);
+return;
+}
+var btn=document.getElementById('reportSubmitBtn');
+btn.disabled=true;btn.textContent='SUBMITTING...';
+
+var overlay=document.getElementById('loadingOverlay');
+var loadingText=document.getElementById('loadingText');
+overlay.classList.add('show');
+loadingText.textContent='Submitting report...';
+
+var reportData={
+matchId:matchId,
+matchTitle:currentMatch.title,
+reporterId:user.id,
+reporterName:user.name||'Unknown',
+reporterEmail:user.email||'',
+reportedSlot:parseInt(slot),
+reportedUserId:reportedPlayer.userId||'',
+reportedIgn:reportedPlayer.ffIgn||'',
+reportedName:reportedPlayer.realName||'',
+reportedMobile:reportedPlayer.mobileNumber||'',
+reason:reason,
+details:details,
+videoLink:videoLink,
+screenshot:reportImageData||'',
+hasScreenshot:reportImageData?true:false,
+hasVideo:videoLink?true:false,
+status:'pending',
+createdAt:new Date().toISOString()
+};
+
+return db.collection('reports').add(reportData).then(function(){
+overlay.classList.remove('show');
+closeReportModal();
+showToast('Report submitted! Admin will review it.','linear-gradient(135deg,#ff3131,#ff5252)');
+}).catch(function(e){
+overlay.classList.remove('show');
+showPop('Error',e.message,null,false);
+btn.disabled=false;btn.textContent='SUBMIT REPORT';
+});
+});
+}
+
+// ============ STARTUP ============
+try{
+if(typeof firebase==='undefined'){showErr('Firebase did not load. Check internet.');}
+else{
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+db=firebase.firestore();
+try{user=JSON.parse(localStorage.getItem('primeArenaUser')||'{}');}catch(e){user={};}
+if(!user||!user.id){location.href='login.html';}
+else{
+matchId=getMid();
+if(!matchId){showErr('No match selected. Please tap a match again.');}
+else{loadMatch();}
+}
+}
+}catch(e){showErr('Startup error: '+e.message);}
+</script>
+</body>
+</html>

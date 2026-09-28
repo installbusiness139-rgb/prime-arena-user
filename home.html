@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Home - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:80px;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#0d1230;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.logo-small{width:35px;height:35px;border-radius:50%;border:2px solid #ffa500}
+.welcome-text{font-size:11px;color:#ccc}
+.username{font-size:14px;color:#ffa500;font-weight:bold}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.coin-balance{display:flex;align-items:center;gap:5px;background:#1a1f3a;padding:6px 12px;border-radius:20px;border:1px solid #ffa500;min-width:70px;justify-content:center}
+.coin-icon{color:#ffa500;font-size:16px}
+.coin-count{font-size:14px;font-weight:bold;color:#ffa500}
+.coin-count.loading{color:#888;font-size:12px}
+.notification-bell{position:relative;font-size:22px;cursor:pointer}
+.notification-badge{position:absolute;top:-5px;right:-5px;background:#ff3131;color:white;font-size:9px;padding:2px 5px;border-radius:10px}
+.quick-icons{display:flex;justify-content:space-around;padding:15px 10px;gap:8px}
+.quick-icon{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
+.quick-icon-img{width:45px;height:45px;background:#1a1f3a;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:20px;border:2px solid #ffa500}
+.quick-icon-label{font-size:10px;color:#ccc;text-align:center}
+.how-to-use{margin:0 15px 15px;background:#1a1f3a;border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border:1px solid #ffa500}
+.how-to-use-text{color:#ffa500;font-weight:bold;font-size:13px}
+.section-title{display:flex;justify-content:space-between;align-items:center;padding:12px 15px}
+.section-title h2{font-size:16px;color:white}
+.section-title span{font-size:11px;color:#ffa500}
+.contests-row{display:flex;justify-content:space-around;padding:0 15px 15px;gap:8px}
+.contest-card{flex:1;background:#1a1f3a;border-radius:10px;padding:12px;text-align:center;border:1px solid #2a2f4a;cursor:pointer}
+.contest-icon{font-size:25px;margin-bottom:5px}
+.contest-label{font-size:11px;color:#ccc;margin-bottom:3px}
+.contest-count{font-size:18px;font-weight:bold;color:#ffa500}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a2f4a;z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#666;font-size:11px;padding:5px 10px}
+.nav-item.active{color:#ffa500}
+.nav-icon{font-size:22px}
+.support-btn{position:fixed;bottom:90px;right:20px;width:55px;height:55px;background:#ff3131;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:26px;cursor:pointer;box-shadow:0 5px 15px rgba(255,49,49,.4);z-index:99}
+</style>
+</head>
+<body>
+<div class="topbar">
+<div class="topbar-left">
+<img src="images/logo.png" class="logo-small" alt="Logo">
+<div>
+<div class="welcome-text">Welcome Back,</div>
+<div class="username" id="userName">PLAYER</div>
+</div>
+</div>
+<div class="topbar-right">
+<div class="coin-balance">
+<span class="coin-icon">🪙</span>
+<span class="coin-count loading" id="coinBalance">...</span>
+</div>
+<div class="notification-bell">
+🔔
+<span class="notification-badge">1</span>
+</div>
+</div>
+</div>
+
+<div class="quick-icons">
+<div class="quick-icon" onclick="location.href='profile.html'">
+<div class="quick-icon-img">👤</div>
+<div class="quick-icon-label">MY PROFILE</div>
+</div>
+<div class="quick-icon" onclick="location.href='wallet.html'">
+<div class="quick-icon-img">💰</div>
+<div class="quick-icon-label">MY WALLET</div>
+</div>
+<div class="quick-icon" onclick="location.href='leaderboard.html'">
+<div class="quick-icon-img">🏆</div>
+<div class="quick-icon-label">TOP PLAYER</div>
+</div>
+<div class="quick-icon" onclick="location.href='contact.html'">
+<div class="quick-icon-img">🎧</div>
+<div class="quick-icon-label">CONTACT US</div>
+</div>
+</div>
+
+<div class="how-to-use" onclick="alert('How to Use: 1. Add Coins, 2. Join Match, 3. Win & Withdraw!')">
+<span class="how-to-use-text">❓ How to Use Our App</span>
+<span style="color:#ffa500">▼</span>
+</div>
+
+<div class="section-title">
+<h2>MY CONTESTS</h2>
+<span>Your Tournaments Journey</span>
+</div>
+
+<div class="contests-row">
+<div class="contest-card" onclick="location.href='tournaments.html'">
+<div class="contest-icon">🔄</div>
+<div class="contest-label">Ongoing</div>
+<div class="contest-count">0</div>
+</div>
+<div class="contest-card" onclick="location.href='tournaments.html'">
+<div class="contest-icon">📅</div>
+<div class="contest-label">Upcoming</div>
+<div class="contest-count">0</div>
+</div>
+<div class="contest-card" onclick="location.href='tournaments.html'">
+<div class="contest-icon">✅</div>
+<div class="contest-label">Completed</div>
+<div class="contest-count">0</div>
+</div>
+</div>
+
+<div class="support-btn" onclick="location.href='contact.html'">🎧</div>
+
+<div class="bottom-nav">
+<div class="nav-item" onclick="location.href='tournaments.html'"><span class="nav-icon">🎮</span><span>Tournaments</span></div>
+<div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏆</span><span>Leaderboard</span></div>
+<div class="nav-item active" onclick="location.href='home.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
+<div class="nav-item" onclick="location.href='wallet.html'"><span class="nav-icon">💰</span><span>Wallet</span></div>
+<div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+authDomain: "prime-arena-a302b.firebaseapp.com",
+projectId: "prime-arena-a302b",
+storageBucket: "prime-arena-a302b.firebasestorage.app",
+messagingSenderId: "118236794000",
+appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+measurementId: "G-EQJP1D9C92"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+var user = {};
+try {
+user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+} catch(e) {
+user = {};
+}
+
+if (!user.id) {
+location.href = 'login.html';
+}
+
+if (user.name) {
+document.getElementById('userName').textContent = user.name;
+}
+
+var firstLoadDone = false;
+
+async function loadUserBalance() {
+var balanceEl = document.getElementById('coinBalance');
+try {
+const userDocRef = doc(db, "users", user.id);
+const userDocSnap = await getDoc(userDocRef);
+
+if (userDocSnap.exists()) {
+var data = userDocSnap.data();
+var balance = data.balance || 0;
+
+balanceEl.textContent = balance;
+balanceEl.classList.remove('loading');
+
+user.balance = balance;
+try {
+localStorage.setItem('primeArenaUser', JSON.stringify(user));
+} catch(e) {}
+
+firstLoadDone = true;
+} else {
+// User not found - show 0
+balanceEl.textContent = '0';
+balanceEl.classList.remove('loading');
+firstLoadDone = true;
+}
+} catch (error) {
+console.error("Error loading balance:", error);
+// If load fails but we haven't shown anything yet, show 0
+if (!firstLoadDone) {
+balanceEl.textContent = '0';
+balanceEl.classList.remove('loading');
+firstLoadDone = true;
+}
+}
+}
+
+loadUserBalance();
+setInterval(loadUserBalance, 5000);
+</script>
+</body>
+</html>

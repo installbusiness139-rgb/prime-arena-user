@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contact Us - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0e27;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      padding-bottom: 80px;
+      min-height: 100vh;
+    }
+    
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: #0d1230;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 15px;
+    }
+    
+    .back-btn {
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .topbar-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    /* Container */
+    .container {
+      padding: 20px 15px;
+    }
+    
+    /* Warning Box */
+    .warning-box {
+      background: rgba(255, 165, 0, 0.1);
+      border: 1px solid #ffa500;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    
+    .warning-icon {
+      font-size: 22px;
+    }
+    
+    .warning-text {
+      font-size: 12px;
+      color: #ffa500;
+      line-height: 1.5;
+    }
+    
+    /* Support Card */
+    .support-card {
+      background: #1a1f3a;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border: 1px solid #2a2f4a;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+    }
+    
+    .support-card:active {
+      background: #2a2f4a;
+    }
+    
+    .support-icon-box {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    
+    .instagram-bg {
+      background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+    }
+    
+    .whatsapp-bg {
+      background: linear-gradient(135deg, #25d366, #128c7e);
+    }
+    
+    .telegram-bg {
+      background: linear-gradient(135deg, #0088cc, #00aaff);
+    }
+    
+    .support-info {
+      flex: 1;
+    }
+    
+    .support-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .support-badge {
+      font-size: 9px;
+      background: #00c853;
+      color: white;
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    
+    .support-subtitle {
+      font-size: 12px;
+      color: #ccc;
+    }
+    
+    .support-arrow {
+      font-size: 20px;
+      color: #666;
+    }
+    
+    /* Official Support Section */
+    .section-title {
+      font-size: 14px;
+      color: #ffa500;
+      font-weight: bold;
+      margin: 25px 0 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .official-card {
+      background: #1a1f3a;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid #2a2f4a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    
+    .official-card:active {
+      background: #2a2f4a;
+    }
+    
+    .official-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #0088cc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .official-info {
+      flex: 1;
+    }
+    
+    .official-label {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 2px;
+      letter-spacing: 1px;
+    }
+    
+    .official-handle {
+      font-size: 14px;
+      color: white;
+      font-weight: bold;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1230;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #2a2f4a;
+      z-index: 100;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      color: #666;
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+    
+    .nav-item.active {
+      color: #ffa500;
+    }
+    
+    .nav-icon {
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="back-btn" onclick="window.location.href='home.html'">←</div>
+    <div class="topbar-title">CONTACT US</div>
+  </div>
+
+  <div class="container">
+    <!-- Warning -->
+    <div class="warning-box">
+      <div class="warning-icon">⚠️</div>
+      <div class="warning-text">
+        Use only official support handles & never share your password or account details with anyone.
+      </div>
+    </div>
+
+    <!-- Instagram Support -->
+    <div class="support-card" onclick="openInstagram()">
+      <div class="support-icon-box instagram-bg">📷</div>
+      <div class="support-info">
+        <div class="support-title">Instagram Support</div>
+        <div class="support-subtitle" id="instaHandle">@primearena_official</div>
+      </div>
+      <div class="support-arrow">›</div>
+    </div>
+
+    <!-- WhatsApp Support -->
+    <div class="support-card" onclick="openWhatsApp()">
+      <div class="support-icon-box whatsapp-bg">💬</div>
+      <div class="support-info">
+        <div class="support-title">
+          WhatsApp Support
+          <span class="support-badge">FASTEST</span>
+        </div>
+        <div class="support-subtitle">Scan QR Code to chat with Admin</div>
+      </div>
+      <div class="support-arrow">›</div>
+    </div>
+
+    <!-- Telegram Support -->
+    <div class="support-card" onclick="openTelegram()">
+      <div class="support-icon-box telegram-bg">✈️</div>
+      <div class="support-info">
+        <div class="support-title">Telegram Support</div>
+        <div class="support-subtitle" id="telegramHandle">Join our Telegram Channel</div>
+      </div>
+      <div class="support-arrow">›</div>
+    </div>
+
+    <!-- Official Support Handles -->
+    <div class="section-title">🏆 OFFICIAL SUPPORT HANDLES</div>
+
+    <div class="official-card" onclick="openTelegramChannel()">
+      <div class="official-icon">✈️</div>
+      <div class="official-info">
+        <div class="official-label">TELEGRAM (MAIN SUPPORT)</div>
+        <div class="official-handle" id="tgMain">@primearena_main</div>
+      </div>
+    </div>
+
+    <div class="official-card" onclick="openTelegramModes()">
+      <div class="official-icon">✈️</div>
+      <div class="official-info">
+        <div class="official-label">TELEGRAM (MODES)</div>
+        <div class="official-handle" id="tgModes">@primearena_modes</div>
+      </div>
+    </div>
+
+    <div class="official-card" onclick="openTelegramPayment()">
+      <div class="official-icon">✈️</div>
+      <div class="official-info">
+        <div class="official-label">TELEGRAM (PAYMENT ISSUE)</div>
+        <div class="official-handle" id="tgPayment">@primearena_payment</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='tournaments.html'">
+      <span class="nav-icon">🎮</span>
+      <span>Tournaments</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='home.html'">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='wallet.html'">
+      <span class="nav-icon">💰</span>
+      <span>Wallet</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script>
+    // For now, these are placeholder links
+    // Later, we will fetch real links from Firebase (Admin Panel Settings)
+    
+    function openInstagram() {
+      // Replace with real Instagram link from Admin Panel
+      alert('Instagram Support\\n\\nComing Soon...\\n\\nAdmin will set the real link from Admin Panel.');
+    }
+    
+    function openWhatsApp() {
+      // WhatsApp QR Code will be shown here
+      alert('WhatsApp Support\\n\\nQR Code will be displayed here.\\n\\nAdmin will upload the QR Code from Admin Panel.');
+    }
+    
+    function openTelegram() {
+      alert('Telegram Support\\n\\nTelegram Channel link will be here.\\n\\nAdmin will set it from Admin Panel.');
+    }
+    
+    function openTelegramChannel() {
+      alert('Telegram Main Support\\n\\n@primearena_main\\n\\nLink will be added from Admin Panel.');
+    }
+    
+    function openTelegramModes() {
+      alert('Telegram Modes Support\\n\\n@primearena_modes');
+    }
+    
+    function openTelegramPayment() {
+      alert('Telegram Payment Support\\n\\n@primearena_payment');
+    }
+  </script>
+</body>
+</html>

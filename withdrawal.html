@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Withdraw - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0e27;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      padding-bottom: 80px;
+      min-height: 100vh;
+    }
+    
+    .topbar {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: #0d1230;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 15px;
+    }
+    
+    .back-btn { font-size: 24px; color: white; cursor: pointer; }
+    .topbar-title { font-size: 18px; font-weight: bold; color: white; }
+    
+    .container { padding: 20px 15px; }
+    
+    .win-balance-box {
+      background: linear-gradient(135deg, #6a1b9a, #8e24aa);
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .win-balance-label { font-size: 14px; color: #ddd; margin-bottom: 10px; }
+    
+    .win-balance-amount {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .win-coin { font-size: 35px; }
+    .win-number { font-size: 40px; font-weight: bold; color: white; }
+    
+    .section {
+      background: #1a1f3a;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #ffa500;
+    }
+    
+    .section-label {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .section-label span { color: #ffa500; font-size: 12px; }
+    
+    .dropdown {
+      width: 100%;
+      background: #0a0e27;
+      border: 1px solid #2a2f4a;
+      border-radius: 10px;
+      padding: 15px;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+    
+    .upi-input {
+      width: 100%;
+      background: #0a0e27;
+      border: 1px solid #2a2f4a;
+      border-radius: 10px;
+      padding: 15px;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+    
+    .upi-input:focus { border-color: #ffa500; }
+    .upi-input::placeholder { color: #666; }
+    
+    .amount-input-box {
+      display: flex;
+      align-items: center;
+      background: #0a0e27;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #2a2f4a;
+    }
+    
+    .rupee-sign { font-size: 28px; color: #ffa500; margin-right: 10px; }
+    
+    .amount-input {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      outline: none;
+      width: 100%;
+    }
+    
+    .amount-input::placeholder { color: #666; }
+    
+    .quick-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    
+    .quick-btn {
+      background: #0a0e27;
+      border: 1px solid #2a2f4a;
+      border-radius: 10px;
+      padding: 12px;
+      color: white;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .quick-btn.selected {
+      background: #ffa500;
+      color: #0a0e27;
+      border-color: #ffa500;
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .cancel-btn {
+      flex: 1;
+      padding: 16px;
+      background: #ff3131;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .withdraw-btn {
+      flex: 1;
+      padding: 16px;
+      background: linear-gradient(135deg, #00c853, #00e676);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .withdraw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .redeem-section {
+      background: #1a1f3a;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #6a1b9a;
+    }
+    
+    .redeem-title {
+      font-size: 15px;
+      color: #ffa500;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
+    .redeem-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #0a0e27;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 1px solid #2a2f4a;
+    }
+    
+    .redeem-coins { font-size: 14px; color: #ccc; }
+    .redeem-inr { font-size: 16px; color: #ffa500; font-weight: bold; }
+    
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #00c853;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: bold;
+      display: none;
+      z-index: 1000;
+    }
+    
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1230;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #2a2f4a;
+      z-index: 100;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      color: #666;
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+    
+    .nav-item.active { color: #ffa500; }
+    .nav-icon { font-size: 22px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="back-btn" onclick="window.location.href='wallet.html'">←</div>
+    <div class="topbar-title">WITHDRAW</div>
+  </div>
+
+  <div class="container">
+    <div class="win-balance-box">
+      <div class="win-balance-label">Win Balance</div>
+      <div class="win-balance-amount">
+        <span class="win-coin">🪙</span>
+        <span class="win-number" id="winBalance">0</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">
+        WITHDRAWAL METHOD
+        <span>Min ₹50 • Max ₹1000</span>
+      </div>
+      
+      <select class="dropdown" id="withdrawMethod">
+        <option value="phonepe">PhonePe</option>
+        <option value="gpay">Google Pay</option>
+        <option value="paytm">Paytm</option>
+        <option value="fampay">FamPay</option>
+      </select>
+      
+      <input type="text" class="upi-input" id="upiId" placeholder="Enter your UPI ID">
+      
+      <div class="amount-input-box">
+        <span class="rupee-sign">₹</span>
+        <input type="number" class="amount-input" id="withdrawAmount" placeholder="0" min="50" max="1000">
+      </div>
+      
+      <div class="quick-buttons">
+        <button type="button" class="quick-btn" onclick="setAmount(50, this)">₹50</button>
+        <button type="button" class="quick-btn" onclick="setAmount(100, this)">₹100</button>
+        <button type="button" class="quick-btn" onclick="setAmount(200, this)">₹200</button>
+        <button type="button" class="quick-btn" onclick="setAmount(500, this)">₹500</button>
+        <button type="button" class="quick-btn" onclick="setAmount(1000, this)">₹1000</button>
+      </div>
+    </div>
+
+    <div class="button-row">
+      <button type="button" class="cancel-btn" onclick="window.location.href='wallet.html'">CANCEL</button>
+      <button type="button" class="withdraw-btn" id="withdrawBtn" onclick="submitWithdraw()">WITHDRAW</button>
+    </div>
+
+    <div class="redeem-section">
+      <div class="redeem-title">🎁 REDEEM CODE (FREE FIRE)</div>
+      
+      <div class="redeem-option" onclick="redeemCode(50, 48)">
+        <div class="redeem-coins">50 COINS = 48 INR</div>
+        <div class="redeem-inr">₹48</div>
+      </div>
+      
+      <div class="redeem-option" onclick="redeemCode(100, 97)">
+        <div class="redeem-coins">100 COINS = 97 INR</div>
+        <div class="redeem-inr">₹97</div>
+      </div>
+      
+      <div class="redeem-option" onclick="redeemCode(150, 146)">
+        <div class="redeem-coins">150 COINS = 146 INR</div>
+        <div class="redeem-inr">₹146</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Request submitted!</div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='tournaments.html'">
+      <span class="nav-icon">🎮</span>
+      <span>Tournaments</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='home.html'">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href='wallet.html'">
+      <span class="nav-icon">💰</span>
+      <span>Wallet</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementId: "G-EQJP1D9C92"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    // Get user
+    var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+    if (!user.id) {
+      window.location.href = 'login.html';
+    }
+    
+    // Load win balance
+    async function loadWinBalance() {
+      try {
+        const userDocRef = doc(db, "users", user.id);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          var data = userDocSnap.data();
+          var winning = data.winning || 0;
+          document.getElementById('winBalance').textContent = winning;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+    
+    // Set amount
+    window.setAmount = function(val, el) {
+      document.getElementById('withdrawAmount').value = val;
+      
+      document.querySelectorAll('.quick-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      el.classList.add('selected');
+    };
+    
+    // Submit withdraw
+    window.submitWithdraw = async function() {
+      var method = document.getElementById('withdrawMethod').value;
+      var upiId = document.getElementById('upiId').value.trim();
+      var amount = document.getElementById('withdrawAmount').value;
+      
+      if (!upiId || !upiId.includes('@')) {
+        alert('Please enter a valid UPI ID');
+        return;
+      }
+      
+      if (!amount || amount < 50) {
+        alert('Minimum withdrawal amount is ₹50');
+        return;
+      }
+      
+      if (amount > 1000) {
+        alert('Maximum withdrawal amount is ₹1000');
+        return;
+      }
+      
+      document.getElementById('withdrawBtn').disabled = true;
+      document.getElementById('withdrawBtn').textContent = 'SUBMITTING...';
+      
+      try {
+        // Check win balance
+        const userDocRef = doc(db, "users", user.id);
+        const userDocSnap = await getDoc(userDocRef);
+        var userData = userDocSnap.data();
+        var winBalance = userData.winning || 0;
+        
+        if (winBalance < amount) {
+          alert('Insufficient Win Balance! You have only ' + winBalance + ' coins.');
+          document.getElementById('withdrawBtn').disabled = false;
+          document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
+          return;
+        }
+        
+        // Save withdrawal request
+        await addDoc(collection(db, "withdrawals"), {
+          userId: user.id,
+          userName: user.name,
+          userEmail: user.email,
+          method: method,
+          upiId: upiId,
+          amount: parseInt(amount),
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        });
+        
+        document.getElementById('withdrawBtn').disabled = false;
+        document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
+        
+        showToast('✅ Withdrawal request submitted! Admin will process within 24-48 hours.');
+        
+        document.getElementById('upiId').value = '';
+        document.getElementById('withdrawAmount').value = '';
+        
+      } catch (error) {
+        console.error("Error:", error);
+        alert('Error: ' + error.message);
+        document.getElementById('withdrawBtn').disabled = false;
+        document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
+      }
+    };
+    
+    // Redeem code
+    window.redeemCode = function(coins, inr) {
+      alert('Redeem Request:\\n\\n' + coins + ' Coins = ₹' + inr + '\\n\\nAfter confirmation, you will get a Free Fire Redeem Code.\\n\\nContact Admin on WhatsApp to complete.');
+    };
+    
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(function() {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+    
+    // Load on page start
+    loadWinBalance();
+  </script>
+</body>
+</html>

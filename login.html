@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding:30px 20px;min-height:100vh}
+.header{margin-bottom:40px}
+.header h1{font-size:32px;color:white;font-weight:bold;line-height:1.3}
+.header h1 span{color:#ffa500}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;margin-bottom:8px;color:#ccc;font-size:14px}
+.form-group input{width:100%;padding:15px;background:#1a1f3a;border:1px solid #2a2f4a;border-radius:10px;color:white;font-size:16px;outline:none}
+.form-group input:focus{border-color:#ffa500}
+.form-group input::placeholder{color:#666}
+.forgot-link{text-align:right;margin-bottom:25px}
+.forgot-link a{color:#ffa500;text-decoration:none;font-size:14px}
+.login-btn{width:100%;padding:16px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:white;font-size:18px;font-weight:bold;cursor:pointer;margin-bottom:25px;letter-spacing:1px}
+.login-btn:disabled{opacity:.6;cursor:not-allowed}
+.signup-link{text-align:center;color:#ccc;font-size:15px}
+.signup-link a{color:#ffa500;text-decoration:none;font-weight:bold}
+.error-msg{color:#ff3131;font-size:13px;margin-top:5px;display:none}
+.success-msg{color:#00c853;font-size:14px;text-align:center;margin-bottom:15px;display:none;padding:15px;background:rgba(0,200,83,.1);border-radius:10px;border:1px solid #00c853}
+.loading-msg{color:#ffa500;font-size:14px;text-align:center;margin-bottom:15px;display:none}
+.auto-login-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a0e27;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:9999}
+.auto-login-overlay.show{display:flex}
+.auto-spinner{width:60px;height:60px;border:5px solid #1a1f3a;border-top-color:#ffa500;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.auto-text{color:#ffa500;font-size:15px;font-weight:bold}
+</style>
+</head>
+<body>
+
+<!-- Auto-login loading overlay -->
+<div class="auto-login-overlay" id="autoLoginOverlay">
+<div class="auto-spinner"></div>
+<div class="auto-text">Logging you in...</div>
+</div>
+
+<div class="header">
+<h1>Welcome to,<br><span>Login</span></h1>
+</div>
+
+<div class="success-msg" id="successMsg">Login Successful! Redirecting to Home...</div>
+<div class="loading-msg" id="loadingMsg">Logging in, please wait...</div>
+
+<form id="loginForm">
+<div class="form-group">
+<label>Email/Mobile No/Username</label>
+<input type="text" id="username" placeholder="Enter your email or mobile">
+<div class="error-msg" id="userError">Please enter your email/mobile</div>
+</div>
+
+<div class="form-group">
+<label>Password</label>
+<input type="password" id="password" placeholder="Enter your password">
+<div class="error-msg" id="passError">Please enter your password</div>
+</div>
+
+<div class="forgot-link">
+<a href="forgot.html">Forgot password?</a>
+</div>
+
+<button type="submit" class="login-btn" id="loginBtn">LOGIN</button>
+</form>
+
+<div class="signup-link">
+Don't have an account? <a href="register.html">Sign Up</a>
+</div>
+
+<script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
+if(!firebase.apps||!firebase.apps.length){firebase.initializeApp(firebaseConfig);}
+var db=firebase.firestore();
+
+// ============ AUTO-LOGIN CHECK (सबसे जरूरी) ============
+var existingUser={};
+try{
+existingUser=JSON.parse(localStorage.getItem('primeArenaUser')||'{}');
+}catch(e){
+existingUser={};
+}
+
+if(existingUser && existingUser.id){
+// User पहले से logged in है → सीधे Home भेजो
+document.getElementById('autoLoginOverlay').classList.add('show');
+setTimeout(function(){
+window.location.replace('home.html');
+},500);
+} else {
+// नहीं है → Login form दिखाओ
+document.getElementById('loginForm').addEventListener('submit',function(e){
+e.preventDefault();
+
+var username=document.getElementById('username').value.trim();
+var password=document.getElementById('password').value;
+
+if(!username){
+document.getElementById('userError').style.display='block';
+return;
+}else{
+document.getElementById('userError').style.display='none';
+}
+
+if(!password){
+document.getElementById('passError').style.display='block';
+return;
+}else{
+document.getElementById('passError').style.display='none';
+}
+
+document.getElementById('loadingMsg').style.display='block';
+document.getElementById('loginBtn').disabled=true;
+
+db.collection("users").where("email","==",username).get().then(function(snap){
+if(!snap.empty){return snap.docs[0];}
+return db.collection("users").where("phone","==",username).get().then(function(phoneSnap){
+if(!phoneSnap.empty){return phoneSnap.docs[0];}
+return null;
+});
+}).then(function(userDoc){
+if(!userDoc){
+showError('User not found! Please check your email/mobile or register.');
+return;
+}
+
+var userData=userDoc.data();
+
+if(userData.password!==password){
+showError('Incorrect password! Please try again.');
+return;
+}
+
+if(userData.isBlocked){
+showError('Your account has been blocked. Please contact support.');
+return;
+}
+
+localStorage.setItem('primeArenaUser',JSON.stringify({
+id:userDoc.id,
+name:userData.name,
+email:userData.email,
+phone:userData.phone,
+balance:userData.balance||0,
+winning:userData.winning||0,
+deposited:userData.deposited||0,
+bonus:userData.bonus||0
+}));
+
+document.getElementById('loadingMsg').style.display='none';
+document.getElementById('successMsg').style.display='block';
+document.getElementById('loginBtn').textContent='SUCCESS!';
+
+setTimeout(function(){
+window.location.replace('home.html');
+},1500);
+
+}).catch(function(error){
+showError('Error: '+error.message);
+});
+});
+}
+
+function showError(msg){
+document.getElementById('loadingMsg').style.display='none';
+document.getElementById('loginBtn').disabled=false;
+document.getElementById('loginBtn').textContent='LOGIN';
+document.getElementById('userError').style.display='block';
+document.getElementById('userError').textContent=msg;
+}
+</script>
+</body>
+</html>

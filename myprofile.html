@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Profile - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0e27; color: white; font-family: Arial, sans-serif; padding-bottom: 80px; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; padding: 15px; background: #0d1230; border-bottom: 1px solid #2a2f4a; position: sticky; top: 0; z-index: 100; gap: 15px; }
+    .back-btn { font-size: 24px; color: white; cursor: pointer; }
+    .topbar-title { font-size: 18px; font-weight: bold; color: white; }
+    .container { padding: 15px; }
+    .profile-pic-box { text-align: center; padding: 20px 0; }
+    .profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #ffa500; margin: 0 auto; background: #1a1f3a; display: flex; justify-content: center; align-items: center; font-size: 50px; overflow: hidden; }
+    .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+    .change-pic-btn { margin-top: 10px; background: #1a1f3a; border: 1px solid #ffa500; color: #ffa500; padding: 8px 20px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .form-card { background: #1a1f3a; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #2a2f4a; }
+    .form-card-title { font-size: 14px; color: #ffa500; font-weight: bold; margin-bottom: 15px; letter-spacing: 0.5px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 11px; color: #ccc; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .form-group input { width: 100%; padding: 12px; background: #0a0e27; border: 1px solid #2a2f4a; border-radius: 8px; color: white; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: #ffa500; }
+    .form-group input:disabled { opacity: 0.6; cursor: not-allowed; }
+    .save-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #00c853, #00e676); border: none; border-radius: 12px; color: white; font-size: 15px; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #00c853; color: white; padding: 12px 25px; border-radius: 25px; font-size: 13px; font-weight: bold; display: none; z-index: 2000; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #666; font-size: 11px; padding: 5px 10px; }
+    .nav-item.active { color: #ffa500; }
+    .nav-icon { font-size: 22px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="back-btn" onclick="window.location.href='profile.html'">←</div>
+    <div class="topbar-title">MY PROFILE</div>
+  </div>
+
+  <div class="container">
+    <div class="profile-pic-box">
+      <div class="profile-pic">
+        <img src="images/logo.png" alt="Profile" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">👤 PERSONAL INFO</div>
+      
+      <div class="form-group">
+        <label>USERNAME</label>
+        <input type="text" id="username" disabled>
+      </div>
+      
+      <div class="form-group">
+        <label>FULL NAME</label>
+        <input type="text" id="fullName" disabled>
+      </div>
+      
+      <div class="form-group">
+        <label>EMAIL</label>
+        <input type="email" id="email" disabled>
+      </div>
+      
+      <div class="form-group">
+        <label>MOBILE NUMBER</label>
+        <input type="tel" id="mobile" disabled>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-title">🎮 FREE FIRE INFO</div>
+      
+      <div class="form-group">
+        <label>FREE FIRE IGN (In-Game Name)</label>
+        <input type="text" id="ffIgn" placeholder="Enter your Free Fire IGN">
+      </div>
+      
+      <div class="form-group">
+        <label>FREE FIRE UID</label>
+        <input type="text" id="ffUid" placeholder="Enter your Free Fire UID">
+      </div>
+      
+      <button class="save-btn" id="saveBtn" onclick="saveProfile()">💾 SAVE CHANGES</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Success!</div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='tournaments.html'">
+      <span class="nav-icon">🎮</span>
+      <span>Tournaments</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='home.html'">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='wallet.html'">
+      <span class="nav-icon">💰</span>
+      <span>Wallet</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href='profile.html'">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementId: "G-EQJP1D9C92"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+
+    var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+
+    if (!user.id) {
+      window.location.href = 'login.html';
+    }
+
+    function loadProfile() {
+      db.collection("users").doc(user.id).get().then(function(doc) {
+        if (doc.exists) {
+          var data = doc.data();
+          document.getElementById('username').value = data.name || '';
+          document.getElementById('fullName').value = (data.firstName || '') + ' ' + (data.lastName || '');
+          document.getElementById('email').value = data.email || '';
+          document.getElementById('mobile').value = data.phone || '';
+          document.getElementById('ffIgn').value = data.ffIgn || '';
+          document.getElementById('ffUid').value = data.ffUid || '';
+        }
+      }).catch(function(error) {
+        console.error("Error:", error);
+      });
+    }
+
+    function saveProfile() {
+      var ffIgn = document.getElementById('ffIgn').value.trim();
+      var ffUid = document.getElementById('ffUid').value.trim();
+      
+      document.getElementById('saveBtn').disabled = true;
+      document.getElementById('saveBtn').textContent = 'SAVING...';
+      
+      db.collection("users").doc(user.id).update({
+        ffIgn: ffIgn,
+        ffUid: ffUid
+      }).then(function() {
+        showToast('✅ Profile saved successfully!');
+        document.getElementById('saveBtn').disabled = false;
+        document.getElementById('saveBtn').textContent = '💾 SAVE CHANGES';
+      }).catch(function(error) {
+        alert('Error: ' + error.message);
+        document.getElementById('saveBtn').disabled = false;
+        document.getElementById('saveBtn').textContent = '💾 SAVE CHANGES';
+      });
+    }
+
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(function() {
+        toast.style.display = 'none';
+      }, 2500);
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>

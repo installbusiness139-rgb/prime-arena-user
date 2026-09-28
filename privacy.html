@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Prime Arena</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #0a0e27; 
+      color: white; 
+      font-family: Arial, sans-serif; 
+      padding: 20px; 
+      min-height: 100vh; 
+    }
+    
+    .back-btn { 
+      font-size: 24px; 
+      color: white; 
+      margin-bottom: 20px; 
+      cursor: pointer; 
+      display: inline-block; 
+    }
+    .header { 
+      margin-bottom: 25px; 
+      border-bottom: 1px solid #2a2f4a;
+      padding-bottom: 15px;
+    }
+    .header h1 { 
+      font-size: 26px; 
+      font-weight: bold; 
+      color: #ffa500;
+      letter-spacing: 1px;
+    }
+
+    /* कंटेंट बॉक्स */
+    .content-box {
+      background: #1a1f3a;
+      border: 1px solid #2a2f4a;
+      border-radius: 12px;
+      padding: 20px;
+      color: #d1d5db;
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-wrap; 
+    }
+
+    /* लोडिंग स्टेट */
+    .loading-state {
+      text-align: center;
+      color: #ffa500;
+      font-size: 15px;
+      padding: 30px 0;
+      display: none;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="back-btn" onclick="window.location.href='profile.html'">←</div>
+  
+  <div class="header">
+    <h1>🔒 Privacy Policy</h1>
+  </div>
+
+  <div class="loading-state" id="loadingState">⏳ Loading...</div>
+
+  <div class="content-box" id="contentBox" style="display: none;">
+    <!-- JavaScript इसे भरेगा -->
+  </div>
+
+  <div class="footer">
+    &copy; 2024 Prime Arena. All rights reserved.
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementId: "G-EQJP1D9C92"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    var db = firebase.firestore();
+
+    document.addEventListener("DOMContentLoaded", function() {
+      var contentBox = document.getElementById('contentBox');
+      var loading = document.getElementById('loadingState');
+      
+      loading.style.display = 'block';
+
+      db.collection("settings").doc("privacyPolicy").get().then(function(doc) {
+        loading.style.display = 'none';
+        contentBox.style.display = 'block';
+        
+        if (doc.exists && doc.data().content) {
+          contentBox.innerText = doc.data().content;
+        } else {
+          contentBox.innerText = "Privacy Policy content is not available right now. Please check back later.";
+        }
+      }).catch(function(error) {
+        loading.style.display = 'none';
+        contentBox.style.display = 'block';
+        contentBox.innerText = "Unable to load Privacy Policy right now. Please check your internet connection.";
+        console.error("Error fetching Privacy Policy: ", error);
+      });
+    });
+  </script>
+</body>
+</html>

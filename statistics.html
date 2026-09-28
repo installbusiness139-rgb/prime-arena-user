@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Statistics - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0e27; color: white; font-family: Arial, sans-serif; padding-bottom: 80px; min-height: 100vh; }
+    .topbar { display: flex; align-items: center; padding: 15px; background: #0d1230; border-bottom: 1px solid #2a2f4a; position: sticky; top: 0; z-index: 100; gap: 15px; }
+    .back-btn { font-size: 24px; color: white; cursor: pointer; }
+    .topbar-title { font-size: 18px; font-weight: bold; color: white; }
+    .container { padding: 15px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #1a1f3a; border-radius: 12px; padding: 18px; border: 1px solid #2a2f4a; text-align: center; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+    .stat-value { font-size: 26px; font-weight: bold; color: #ffa500; margin-bottom: 4px; }
+    .stat-label { font-size: 11px; color: #ccc; letter-spacing: 0.5px; }
+    .section-title { font-size: 15px; font-weight: bold; color: #ffa500; margin-bottom: 12px; padding: 0 5px; }
+    .match-card { background: #1a1f3a; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #2a2f4a; border-left: 4px solid #00c853; }
+    .match-card.lost { border-left-color: #ff3131; }
+    .match-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
+    .match-title { font-size: 13px; font-weight: bold; color: white; flex: 1; line-height: 1.4; }
+    .match-rank { font-size: 10px; padding: 3px 10px; border-radius: 10px; font-weight: bold; background: #00c853; color: white; white-space: nowrap; }
+    .match-rank.lost { background: #ff3131; }
+    .match-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .match-detail-item { background: #0a0e27; border-radius: 8px; padding: 8px 6px; text-align: center; }
+    .match-detail-label { font-size: 9px; color: #666; margin-bottom: 3px; }
+    .match-detail-value { font-size: 13px; color: #ffa500; font-weight: bold; }
+    .match-detail-value.win { color: #00c853; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+    .empty-icon { font-size: 60px; margin-bottom: 15px; opacity: 0.5; }
+    .empty-text { font-size: 15px; margin-bottom: 5px; }
+    .empty-subtext { font-size: 12px; color: #444; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #666; font-size: 11px; padding: 5px 10px; }
+    .nav-item.active { color: #ffa500; }
+    .nav-icon { font-size: 22px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="back-btn" onclick="window.location.href='profile.html'">←</div>
+    <div class="topbar-title">MY STATISTICS</div>
+  </div>
+
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-value" id="matchesPlayed">0</div>
+        <div class="stat-label">Matches Played</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💀</div>
+        <div class="stat-value" id="totalKills">0</div>
+        <div class="stat-label">Total Kills</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-value" id="totalWins">0</div>
+        <div class="stat-label">Total Wins</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🪙</div>
+        <div class="stat-value" id="totalEarned">0</div>
+        <div class="stat-label">Total Earned</div>
+      </div>
+    </div>
+
+    <div class="section-title">📜 MATCH HISTORY</div>
+    <div id="matchHistory">
+      <div class="empty-state">
+        <div class="empty-icon">⏳</div>
+        <div class="empty-text">Loading match history...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='tournaments.html'">
+      <span class="nav-icon">🎮</span>
+      <span>Tournaments</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='home.html'">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='wallet.html'">
+      <span class="nav-icon">💰</span>
+      <span>Wallet</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href='profile.html'">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementId: "G-EQJP1D9C92"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+
+    var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+
+    if (!user.id) {
+      window.location.href = 'login.html';
+    }
+
+    function loadStats() {
+      // Load user stats
+      db.collection("users").doc(user.id).get().then(function(doc) {
+        if (doc.exists) {
+          var data = doc.data();
+          document.getElementById('matchesPlayed').textContent = data.matchesPlayed || 0;
+          document.getElementById('totalKills').textContent = data.totalKills || 0;
+          document.getElementById('totalWins').textContent = data.totalWins || 0;
+          document.getElementById('totalEarned').textContent = data.winning || 0;
+        }
+      }).catch(function(error) {
+        console.error("Error:", error);
+      });
+
+      // Load match history (transactions)
+      db.collection("transactions")
+        .where("userId", "==", user.id)
+        .get()
+        .then(function(snapshot) {
+          var matches = [];
+          snapshot.forEach(function(doc) {
+            var data = doc.data();
+            data.id = doc.id;
+            if (data.type === 'match_entry' || data.type === 'match_win') {
+              matches.push(data);
+            }
+          });
+          
+          matches.sort(function(a, b) {
+            return new Date(b.timestamp) - new Date(a.timestamp);
+          });
+          
+          displayMatchHistory(matches);
+        }).catch(function(error) {
+          console.error("Error:", error);
+          displayMatchHistory([]);
+        });
+    }
+
+    function displayMatchHistory(matches) {
+      var container = document.getElementById('matchHistory');
+      
+      if (matches.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">📜</div><div class="empty-text">No Match History</div><div class="empty-subtext">Join a tournament to see your history here.</div></div>';
+        return;
+      }
+      
+      // Group by matchId
+      var matchGroups = {};
+      matches.forEach(function(m) {
+        if (!matchGroups[m.matchId]) {
+          matchGroups[m.matchId] = {
+            matchId: m.matchId,
+            matchTitle: m.matchTitle || 'Tournament Match',
+            entry: null,
+            win: null,
+            timestamp: m.timestamp
+          };
+        }
+        if (m.type === 'match_entry') {
+          matchGroups[m.matchId].entry = m;
+        } else if (m.type === 'match_win') {
+          matchGroups[m.matchId].win = m;
+        }
+      });
+      
+      var html = '';
+      Object.values(matchGroups).forEach(function(g) {
+        var date = new Date(g.timestamp);
+        var timeStr = date.toLocaleString('en-IN', {
+          day: '2-digit', month: 'short',
+          hour: '2-digit', minute: '2-digit'
+        });
+        
+        var isWin = g.win !== null;
+        var kills = g.win ? g.win.kills : 0;
+        var prize = g.win ? g.win.amount : 0;
+        var rank = g.win ? g.win.rank : '-';
+        
+        html += '<div class="match-card ' + (isWin ? '' : 'lost') + '">' +
+          '<div class="match-header">' +
+            '<div class="match-title">' + g.matchTitle + '</div>' +
+            '<div class="match-rank ' + (isWin ? '' : 'lost') + '">' + (isWin ? 'RANK #' + rank : 'LOST') + '</div>' +
+          '</div>' +
+          '<div class="match-details">' +
+            '<div class="match-detail-item">' +
+              '<div class="match-detail-label">KILLS</div>' +
+              '<div class="match-detail-value">' + kills + '</div>' +
+            '</div>' +
+            '<div class="match-detail-item">' +
+              '<div class="match-detail-label">PRIZE</div>' +
+              '<div class="match-detail-value win">🪙 ' + prize + '</div>' +
+            '</div>' +
+            '<div class="match-detail-item">' +
+              '<div class="match-detail-label">DATE</div>' +
+              '<div class="match-detail-value">' + timeStr + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      });
+      
+      container.innerHTML = html;
+    }
+
+    loadStats();
+  </script>
+</body>
+</html>

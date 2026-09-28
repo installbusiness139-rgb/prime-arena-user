@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaderboard - Prime Arena</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: #0a0e27;
+      color: white;
+      font-family: 'Arial', sans-serif;
+      padding-bottom: 80px;
+      min-height: 100vh;
+    }
+    
+    /* Top Bar */
+    .topbar {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: #0d1230;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 15px;
+    }
+    
+    .back-btn {
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+    }
+    
+    .topbar-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #0d1230;
+      padding: 0 15px;
+      gap: 8px;
+      overflow-x: auto;
+      border-bottom: 1px solid #2a2f4a;
+    }
+    
+    .tab {
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #666;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab.active {
+      color: #ffa500;
+      border-bottom: 3px solid #ffa500;
+    }
+    
+    /* Header Row */
+    .header-row {
+      display: flex;
+      background: linear-gradient(90deg, #ff6b00, #ffa500);
+      padding: 12px 15px;
+      margin: 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #0a0e27;
+    }
+    
+    .header-position {
+      width: 60px;
+      text-align: center;
+    }
+    
+    .header-name {
+      flex: 1;
+      padding-left: 15px;
+    }
+    
+    .header-winning {
+      width: 80px;
+      text-align: right;
+      padding-right: 10px;
+    }
+    
+    /* Player Row */
+    .player-list {
+      padding: 0 15px;
+    }
+    
+    .player-row {
+      display: flex;
+      align-items: center;
+      background: #1a1f3a;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid #2a2f4a;
+    }
+    
+    .player-row.top-1 {
+      border: 1px solid #ffd700;
+      background: linear-gradient(90deg, #1a1f3a, #2a2010);
+    }
+    
+    .player-row.top-2 {
+      border: 1px solid #c0c0c0;
+      background: linear-gradient(90deg, #1a1f3a, #202020);
+    }
+    
+    .player-row.top-3 {
+      border: 1px solid #cd7f32;
+      background: linear-gradient(90deg, #1a1f3a, #2a1a0a);
+    }
+    
+    .player-position {
+      width: 60px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #ffa500;
+    }
+    
+    .player-position.crown {
+      font-size: 22px;
+    }
+    
+    .player-name {
+      flex: 1;
+      padding-left: 15px;
+      font-size: 14px;
+      color: white;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .player-winning {
+      width: 80px;
+      text-align: right;
+      font-size: 14px;
+      font-weight: bold;
+      color: #ffa500;
+      padding-right: 10px;
+    }
+    
+    .coin-icon {
+      font-size: 14px;
+      margin-right: 3px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+    
+    .empty-icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+    
+    .empty-text {
+      font-size: 15px;
+      margin-bottom: 5px;
+    }
+    
+    .empty-subtext {
+      font-size: 12px;
+      color: #444;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0d1230;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #2a2f4a;
+      z-index: 100;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      color: #666;
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+    
+    .nav-item.active {
+      color: #ffa500;
+    }
+    
+    .nav-icon {
+      font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="back-btn" onclick="window.location.href='home.html'">←</div>
+    <div class="topbar-title">LEADERBOARD</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('daily', this)">Daily</div>
+    <div class="tab" onclick="switchTab('weekly', this)">Weekly</div>
+    <div class="tab" onclick="switchTab('monthly', this)">Monthly</div>
+    <div class="tab" onclick="switchTab('lifetime', this)">Lifetime</div>
+  </div>
+
+  <!-- Header Row -->
+  <div class="header-row" id="headerRow">
+    <div class="header-position">#</div>
+    <div class="header-name">Player Name</div>
+    <div class="header-winning">Winning</div>
+  </div>
+
+  <!-- Player List -->
+  <div class="player-list" id="playerList">
+    <!-- Players will be loaded here from Firebase -->
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='tournaments.html'">
+      <span class="nav-icon">🎮</span>
+      <span>Tournaments</span>
+    </div>
+    <div class="nav-item active" onclick="window.location.href='leaderboard.html'">
+      <span class="nav-icon">🏆</span>
+      <span>Leaderboard</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='home.html'">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='wallet.html'">
+      <span class="nav-icon">💰</span>
+      <span>Wallet</span>
+    </div>
+    <div class="nav-item" onclick="window.location.href='profile.html'">
+      <span class="nav-icon">👤</span>
+      <span>Profile</span>
+    </div>
+  </div>
+
+  <script>
+    var currentTab = 'daily';
+    
+    function switchTab(tab, el) {
+      currentTab = tab;
+      
+      document.querySelectorAll('.tab').forEach(function(t) {
+        t.classList.remove('active');
+      });
+      el.classList.add('active');
+      
+      loadLeaderboard();
+    }
+    
+    function loadLeaderboard() {
+      // For now, show empty state
+      // Later, we will fetch real data from Firebase
+      
+      var playerList = document.getElementById('playerList');
+      var headerRow = document.getElementById('headerRow');
+      
+      // Show header
+      headerRow.style.display = 'flex';
+      
+      // Empty state
+      playerList.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🏆</div>
+          <div class="empty-text">No Players Yet</div>
+          <div class="empty-subtext">Be the first to win!</div>
+        </div>
+      `;
+    }
+    
+    // Load on page start
+    loadLeaderboard();
+  </script>
+</body>
+</html>
