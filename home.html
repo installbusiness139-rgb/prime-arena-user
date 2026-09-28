@@ -37,6 +37,17 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .nav-item.active{color:#ffa500}
 .nav-icon{font-size:22px}
 .support-btn{position:fixed;bottom:90px;right:20px;width:55px;height:55px;background:#ff3131;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:26px;cursor:pointer;box-shadow:0 5px 15px rgba(255,49,49,.4);z-index:99}
+
+/* ============ BAN POPUP ============ */
+.ban-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:99999;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(5px)}
+.ban-overlay.show{display:flex}
+.ban-box{background:#0f121d;border:1px solid #ff3131;border-radius:18px;padding:30px 22px;width:100%;max-width:360px;text-align:center;box-shadow:0 10px 40px rgba(255,49,49,.3)}
+.ban-icon{width:80px;height:80px;background:linear-gradient(135deg,#ff3131,#ff5252);border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:40px;margin:0 auto 20px;box-shadow:0 0 30px rgba(255,49,49,.5)}
+.ban-title{font-size:22px;font-weight:bold;color:#ff3131;margin-bottom:12px;letter-spacing:1px}
+.ban-msg{font-size:14px;color:#ccc;line-height:1.6;margin-bottom:25px}
+.ban-msg b{color:#ffa500}
+.ban-btn{width:100%;padding:15px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px}
+.ban-btn:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -117,6 +128,19 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
 </div>
 
+<!-- ============ BAN POPUP HTML ============ -->
+<div class="ban-overlay" id="banOverlay">
+<div class="ban-box">
+<div class="ban-icon">🔒</div>
+<div class="ban-title">ACCOUNT BLOCKED</div>
+<div class="ban-msg">
+Your account has been <b>blocked by admin</b>.<br>
+Please contact support for more information.
+</div>
+<button class="ban-btn" onclick="closeAndLogout()">OK, I UNDERSTAND</button>
+</div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
@@ -150,6 +174,7 @@ document.getElementById('userName').textContent = user.name;
 }
 
 var firstLoadDone = false;
+var banDetected = false;
 
 async function loadUserBalance() {
 var balanceEl = document.getElementById('coinBalance');
@@ -189,18 +214,26 @@ const userRef = doc(db, "users", user.id);
 onSnapshot(userRef, function(snapshot) {
 if (snapshot.exists()) {
 var data = snapshot.data();
-if (data.isBlocked === true) {
-try {
-localStorage.removeItem('primeArenaUser');
-sessionStorage.clear();
-} catch(e) {}
-alert('Your account has been blocked by admin. Please contact support.');
-window.location.replace('login.html');
+if (data.isBlocked === true && !banDetected) {
+banDetected = true;
+// Show beautiful popup instead of browser alert
+document.getElementById('banOverlay').classList.add('show');
 }
 }
 });
 
 setInterval(loadUserBalance, 5000);
+</script>
+
+<script>
+// Global function to close popup and logout
+function closeAndLogout() {
+try {
+localStorage.removeItem('primeArenaUser');
+sessionStorage.clear();
+} catch(e) {}
+window.location.replace('login.html');
+}
 </script>
 </body>
   </html>
