@@ -183,8 +183,8 @@ WITHDRAWAL METHOD
 <div class="nav-item" onclick="location.href='home.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
 <div class="nav-item active" onclick="location.href='wallet.html'"><span class="nav-icon">💰</span><span>Wallet</span></div>
 <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
-  </div>
-  <script type="module">
+                                                                                       </div>
+                                                                                       <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
@@ -223,12 +223,10 @@ document.getElementById('popupTitle').textContent = title || '';
 document.getElementById('popupMsg').innerHTML = msg || '';
 document.getElementById('popupNote').innerHTML = note || '';
 document.getElementById('popupNote').style.display = note ? 'block' : 'none';
-
 var btn = document.getElementById('popupBtn');
 btn.className = 'popup-btn';
 if (type === 'error') btn.classList.add('error');
 else if (type === 'warning') btn.classList.add('warning');
-
 document.getElementById('customPopup').classList.add('show');
 };
 
@@ -242,10 +240,8 @@ var startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
 var total = 24 * 60 * 60 * 1000;
 var timer = document.getElementById('withdrawTimer');
 var valEl = document.getElementById('withdrawTimerValue');
-
 timer.classList.add('show');
 timer.classList.remove('over');
-
 function update() {
 var remaining = total - (Date.now() - startTime);
 if (remaining <= 0) {
@@ -269,10 +265,8 @@ var startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
 var total = 24 * 60 * 60 * 1000;
 var timer = document.getElementById('redeemTimer');
 var valEl = document.getElementById('redeemTimerValue');
-
 timer.classList.add('show');
 timer.classList.remove('over');
-
 function update() {
 var remaining = total - (Date.now() - startTime);
 if (remaining <= 0) {
@@ -292,9 +286,13 @@ redeemTimerInt = setInterval(update, 1000);
 
 async function checkActiveRequests() {
 try {
+var hasPendingWithdraw = false;
+var hasPendingRedeem = false;
+
 var wQuery = query(collection(db, "withdrawals"), where("userId", "==", user.id), where("status", "==", "pending"));
 var wSnap = await getDocs(wQuery);
 if (!wSnap.empty) {
+hasPendingWithdraw = true;
 var wList = [];
 wSnap.forEach(function(d) { wList.push(d.data()); });
 wList.sort(function(a, b) { return new Date(b.withdrawTime || b.createdAt) - new Date(a.withdrawTime || a.createdAt); });
@@ -309,6 +307,7 @@ startWithdrawTimer(startTime);
 var rQuery = query(collection(db, "redeem_requests"), where("userId", "==", user.id), where("status", "==", "pending"));
 var rSnap = await getDocs(rQuery);
 if (!rSnap.empty) {
+hasPendingRedeem = true;
 var rList = [];
 rSnap.forEach(function(d) { rList.push(d.data()); });
 rList.sort(function(a, b) { return new Date(b.redeemTime || b.createdAt) - new Date(a.redeemTime || a.createdAt); });
@@ -319,6 +318,22 @@ if (elapsedR < 24 * 60 * 60 * 1000) {
 startRedeemTimer(startTimeR);
 }
 }
+
+// ============ SOLUTION 1: DISABLE BUTTONS IF PENDING ============
+if (hasPendingWithdraw) {
+var wBtn = document.getElementById('withdrawBtn');
+wBtn.disabled = true;
+wBtn.textContent = '⏳ PENDING WITHDRAWAL EXISTS';
+wBtn.style.background = '#666';
+}
+
+if (hasPendingRedeem) {
+var rBtn = document.getElementById('redeemBtn');
+rBtn.disabled = true;
+rBtn.textContent = '⏳ PENDING REDEEM EXISTS';
+rBtn.style.background = '#666';
+}
+
 } catch(e) {
 console.error("Check active error:", e);
 }
@@ -362,6 +377,12 @@ document.getElementById('redeemPreview').style.display = 'none';
 });
 
 window.submitWithdraw = async function() {
+var wBtn = document.getElementById('withdrawBtn');
+if (wBtn.disabled) {
+showPopup('⏳', 'Pending Request', 'You already have a pending withdrawal request. Please wait for it to complete before submitting a new one.', '', 'warning');
+return;
+}
+
 var method = document.getElementById('withdrawMethod').value;
 var upiId = document.getElementById('upiId').value.trim();
 var amount = document.getElementById('withdrawAmount').value;
@@ -370,34 +391,41 @@ if (!upiId || !upiId.includes('@')) {
 showPopup('⚠️', 'Invalid UPI ID', 'Please enter a valid UPI ID (e.g. name@upi)', '', 'warning');
 return;
 }
-
 if (!amount || amount < 50) {
 showPopup('⚠️', 'Invalid Amount', 'Minimum withdrawal amount is ₹50', '', 'warning');
 return;
 }
-
 if (amount > 1000) {
 showPopup('⚠️', 'Limit Exceeded', 'Maximum withdrawal amount is ₹1000', '', 'warning');
 return;
 }
 
-document.getElementById('withdrawBtn').disabled = true;
-document.getElementById('withdrawBtn').textContent = 'SUBMITTING...';
+wBtn.disabled = true;
+wBtn.textContent = 'SUBMITTING...';
 
 try {
+var wCheck = query(collection(db, "withdrawals"), where("userId", "==", user.id), where("status", "==", "pending"));
+var wcSnap = await getDocs(wCheck);
+if (!wcSnap.empty) {
+showPopup('⏳', 'Pending Request', 'You already have a pending withdrawal request.', '', 'warning');
+wBtn.disabled = true;
+wBtn.textContent = '⏳ PENDING WITHDRAWAL EXISTS';
+wBtn.style.background = '#666';
+return;
+}
+
 var snap = await getDoc(doc(db, "users", user.id));
 var userData = snap.data();
 var winBalance = userData.winning || 0;
-
 if (winBalance < amount) {
 showPopup('❌', 'Insufficient Balance', 'You have only ' + winBalance + ' coins in Win Balance.', '', 'error');
-document.getElementById('withdrawBtn').disabled = false;
-document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
+wBtn.disabled = false;
+wBtn.textContent = 'WITHDRAW';
+wBtn.style.background = '';
 return;
 }
 
 var now = new Date().toISOString();
-
 await addDoc(collection(db, "withdrawals"), {
 userId: user.id,
 userName: user.name,
@@ -410,29 +438,36 @@ withdrawTime: now,
 createdAt: now
 });
 
-document.getElementById('withdrawBtn').disabled = false;
-document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
 document.getElementById('upiId').value = '';
 document.getElementById('withdrawAmount').value = '';
 document.querySelectorAll('.section .quick-btn').forEach(b => b.classList.remove('selected'));
+
+wBtn.disabled = true;
+wBtn.textContent = '⏳ PENDING WITHDRAWAL EXISTS';
+wBtn.style.background = '#666';
 
 var msg = 'आपका <span class="green">विड्रॉल request भेज दी गई है</span>।<br>नीचे timer में देखें — कितना समय बाकी है।';
 showPopup('✅', 'Withdrawal Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।', 'success');
 
 startWithdrawTimer(now);
-
 setTimeout(function() {
 document.getElementById('withdrawTimer').scrollIntoView({behavior:'smooth', block:'center'});
 }, 400);
 
 } catch(e) {
-document.getElementById('withdrawBtn').disabled = false;
-document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
+wBtn.disabled = false;
+wBtn.textContent = 'WITHDRAW';
 showPopup('❌', 'Error', e.message, '', 'error');
 }
 };
 
 window.submitRedeem = async function() {
+var rBtn = document.getElementById('redeemBtn');
+if (rBtn.disabled) {
+showPopup('⏳', 'Pending Request', 'You already have a pending redeem request. Please wait for it to complete before submitting a new one.', '', 'warning');
+return;
+}
+
 var coins = parseInt(document.getElementById('redeemCoins').value) || 0;
 var whatsapp = document.getElementById('redeemWhatsapp').value.trim();
 
@@ -440,29 +475,37 @@ if (!coins || coins < 50) {
 showPopup('⚠️', 'Invalid Coins', 'Minimum 50 coins required for redeem code.', '', 'warning');
 return;
 }
-
 if (coins > 1000) {
 showPopup('⚠️', 'Limit Exceeded', 'Maximum 1000 coins allowed per request.', '', 'warning');
 return;
 }
-
 if (!whatsapp || whatsapp.length !== 10 || !/^\d+$/.test(whatsapp)) {
 showPopup('⚠️', 'Invalid WhatsApp Number', 'Please enter a valid 10-digit WhatsApp number.', '', 'warning');
 return;
 }
 
-document.getElementById('redeemBtn').disabled = true;
-document.getElementById('redeemBtn').textContent = 'SUBMITTING...';
+rBtn.disabled = true;
+rBtn.textContent = 'SUBMITTING...';
 
 try {
+var rCheck = query(collection(db, "redeem_requests"), where("userId", "==", user.id), where("status", "==", "pending"));
+var rcSnap = await getDocs(rCheck);
+if (!rcSnap.empty) {
+showPopup('⏳', 'Pending Request', 'You already have a pending redeem request.', '', 'warning');
+rBtn.disabled = true;
+rBtn.textContent = '⏳ PENDING REDEEM EXISTS';
+rBtn.style.background = '#666';
+return;
+}
+
 var snap = await getDoc(doc(db, "users", user.id));
 var userData = snap.data();
 var winBalance = userData.winning || 0;
-
 if (winBalance < coins) {
 showPopup('❌', 'Insufficient Balance', 'You have only ' + winBalance + ' coins in Win Balance.', '', 'error');
-document.getElementById('redeemBtn').disabled = false;
-document.getElementById('redeemBtn').textContent = '🎁 REQUEST REDEEM CODE';
+rBtn.disabled = false;
+rBtn.textContent = '🎁 REQUEST REDEEM CODE';
+rBtn.style.background = '';
 return;
 }
 
@@ -483,25 +526,26 @@ redeemTime: now,
 createdAt: now
 });
 
-document.getElementById('redeemBtn').disabled = false;
-document.getElementById('redeemBtn').textContent = '🎁 REQUEST REDEEM CODE';
 document.getElementById('redeemCoins').value = '';
 document.getElementById('redeemWhatsapp').value = '';
 document.getElementById('redeemPreview').style.display = 'none';
 document.querySelectorAll('.redeem-section .quick-btn').forEach(b => b.classList.remove('selected'));
 
+rBtn.disabled = true;
+rBtn.textContent = '⏳ PENDING REDEEM EXISTS';
+rBtn.style.background = '#666';
+
 var msg = '<span class="orange">' + coins + ' coins</span> के लिए redeem code request भेजी गई है।<br>आपको <span class="green">₹' + parseFloat(inrAmount).toFixed(2) + '</span> का redeem code मिलेगा।<br>नीचे timer में देखें।';
 showPopup('🎁', 'Redeem Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।', 'success');
 
 startRedeemTimer(now);
-
 setTimeout(function() {
 document.getElementById('redeemTimer').scrollIntoView({behavior:'smooth', block:'center'});
 }, 400);
 
 } catch(e) {
-document.getElementById('redeemBtn').disabled = false;
-document.getElementById('redeemBtn').textContent = '🎁 REQUEST REDEEM CODE';
+rBtn.disabled = false;
+rBtn.textContent = '🎁 REQUEST REDEEM CODE';
 showPopup('❌', 'Error', e.message, '', 'error');
 }
 };
@@ -511,4 +555,4 @@ checkActiveRequests();
 </script>
 <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+  </html>
