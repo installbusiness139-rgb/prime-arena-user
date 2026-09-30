@@ -30,19 +30,20 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .quick-btn{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:14px;color:white;font-size:15px;font-weight:bold;cursor:pointer}
 .quick-btn.selected{background:#ffa500;color:#0a0e27;border-color:#ffa500}
 .button-row{display:flex;gap:10px;margin-bottom:20px}
-.cancel-btn{flex:1;padding:18px;background:#ff3131;border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
+.cancel-btn{flex:1;padding:18px;background:#2a2f4a;border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
 .withdraw-btn{flex:1;padding:18px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
 .withdraw-btn:disabled{opacity:.5;cursor:not-allowed}
-.inline-timer{background:#0a0e27;border:2px solid #ffa500;border-radius:14px;padding:22px;margin-bottom:20px;text-align:center;display:none}
+.inline-timer{background:rgba(255,80,80,0.12);border:1.5px solid #ff5252;border-radius:14px;padding:20px 18px;margin-bottom:20px;text-align:center;display:none}
 .inline-timer.show{display:block}
-.inline-timer.over{border-color:#ff3131}
-.inline-timer .tlbl{font-size:12px;color:#ffa500;letter-spacing:3px;margin-bottom:12px;font-weight:bold}
-.inline-timer.over .tlbl{color:#ff3131}
-.inline-timer .tval{font-size:42px;font-weight:bold;color:#fff;font-family:monospace;letter-spacing:3px;line-height:1.2}
-.inline-timer.over .tval{color:#ff3131;font-size:20px}
-.inline-timer .tmsg{font-size:13px;color:#00e676;margin-top:15px;line-height:1.6;padding:0 10px}
-.inline-timer.over .tmsg{color:#ff6b6b}
-.inline-timer .tsub{font-size:11px;color:#666;margin-top:10px;line-height:1.5}
+.inline-timer.over{border-color:#ff3131;background:rgba(255,49,49,0.2)}
+.inline-timer .tlbl{font-size:14px;color:#ff5252;font-weight:bold;margin-bottom:12px;letter-spacing:.5px}
+.inline-timer .tval{font-size:34px;font-weight:bold;color:#fff;font-family:'Courier New',monospace;letter-spacing:2px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.inline-timer .tval .clock{font-size:26px}
+.inline-timer .tval .remaining{font-size:14px;color:#ff8a8a;font-weight:normal;letter-spacing:0}
+.inline-timer.over .tval{color:#ff3131;font-size:22px}
+.inline-timer .tmsg{font-size:12px;color:#ccc;margin-top:14px;line-height:1.5;padding:0 5px}
+.inline-timer .tsub{font-size:10px;color:#888;margin-top:8px;line-height:1.5}
+.inline-timer .thr{height:1px;background:rgba(255,82,82,0.3);margin:14px 0}
 .redeem-section{background:#1a1f3a;border-radius:15px;padding:25px 20px;margin-bottom:20px;border:1px solid #6a1b9a}
 .redeem-title{font-size:16px;color:#ffa500;font-weight:bold;margin-bottom:10px}
 .redeem-note{font-size:12px;color:#ffa500;background:rgba(255,165,0,.1);border:1px solid #ffa500;border-radius:8px;padding:12px;margin-bottom:18px;line-height:1.6}
@@ -60,12 +61,12 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .popup-overlay.show{display:flex}
 .popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:18px;padding:28px 22px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.8)}
 .popup-icon{font-size:55px;margin-bottom:14px;line-height:1}
-.popup-title{color:#fca311;font-size:21px;font-weight:bold;margin-bottom:14px;letter-spacing:.5px}
+.popup-title{color:#fca311;font-size:21px;font-weight:bold;margin-bottom:14px}
 .popup-msg{color:#ccc;font-size:14px;line-height:1.7;margin-bottom:18px;padding:0 5px}
 .popup-msg .green{color:#00e676}
 .popup-msg .orange{color:#ffa500}
 .popup-note{background:rgba(255,49,49,.1);border:1px solid #ff3131;border-radius:8px;padding:12px;font-size:11px;color:#ff6b6b;line-height:1.6;margin-bottom:20px}
-.popup-btn{width:100%;padding:15px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
+.popup-btn{width:100%;padding:15px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;text-transform:uppercase}
 .popup-btn.error{background:linear-gradient(135deg,#ff3131,#ff5252)}
 .popup-btn.warning{background:linear-gradient(135deg,#ff6b00,#ffa500)}
 </style>
@@ -120,10 +121,11 @@ WITHDRAWAL METHOD
 </div>
 
 <div class="inline-timer" id="withdrawTimer">
-<div class="tlbl">⏱ बचा हुआ समय</div>
-<div class="tval" id="withdrawTimerValue">24:00:00</div>
-<div class="tmsg">✅ आपका विड्रॉल 24 घंटे के अंदर successful हो जाएगा।</div>
-<div class="tsub">⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों। अगर कोई suspicious activity पाई गई, तो request cancel हो सकती है।</div>
+<div class="tlbl">Withdrawal Process Timing</div>
+<div class="tval"><span class="clock">⏱</span><span id="withdrawTimerValue">24:00:00</span> <span class="remaining">remaining</span></div>
+<div class="tmsg">✅ Transfer will be processed within 24 hours</div>
+<div class="thr"></div>
+<div class="tsub">⚠️ Only if your request is genuine and details are correct.</div>
 </div>
 
 <div class="redeem-section">
@@ -157,10 +159,11 @@ WITHDRAWAL METHOD
 </div>
 
 <div class="inline-timer" id="redeemTimer">
-<div class="tlbl">⏱ बचा हुआ समय</div>
-<div class="tval" id="redeemTimerValue">24:00:00</div>
-<div class="tmsg">✅ आपका redeem code 24 घंटे के अंदर WhatsApp पर मिल जाएगा।</div>
-<div class="tsub">⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।</div>
+<div class="tlbl">Redeem Code Process Timing</div>
+<div class="tval"><span class="clock">⏱</span><span id="redeemTimerValue">24:00:00</span> <span class="remaining">remaining</span></div>
+<div class="tmsg">✅ Redeem code will be sent on WhatsApp within 24 hours</div>
+<div class="thr"></div>
+<div class="tsub">⚠️ Only if your request is genuine and details are correct.</div>
 </div>
 </div>
 
@@ -183,7 +186,7 @@ WITHDRAWAL METHOD
   </div>
   <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, getDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
@@ -233,9 +236,9 @@ window.closePopup = function() {
 document.getElementById('customPopup').classList.remove('show');
 };
 
-function startWithdrawTimer() {
+function startWithdrawTimer(startTimeStr) {
 if (withdrawTimerInt) clearInterval(withdrawTimerInt);
-var startTime = Date.now();
+var startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
 var total = 24 * 60 * 60 * 1000;
 var timer = document.getElementById('withdrawTimer');
 var valEl = document.getElementById('withdrawTimerValue');
@@ -260,9 +263,9 @@ update();
 withdrawTimerInt = setInterval(update, 1000);
 }
 
-function startRedeemTimer() {
+function startRedeemTimer(startTimeStr) {
 if (redeemTimerInt) clearInterval(redeemTimerInt);
-var startTime = Date.now();
+var startTime = startTimeStr ? new Date(startTimeStr).getTime() : Date.now();
 var total = 24 * 60 * 60 * 1000;
 var timer = document.getElementById('redeemTimer');
 var valEl = document.getElementById('redeemTimerValue');
@@ -285,6 +288,40 @@ valEl.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') 
 }
 update();
 redeemTimerInt = setInterval(update, 1000);
+}
+
+async function checkActiveRequests() {
+try {
+var wQuery = query(collection(db, "withdrawals"), where("userId", "==", user.id), where("status", "==", "pending"));
+var wSnap = await getDocs(wQuery);
+if (!wSnap.empty) {
+var wList = [];
+wSnap.forEach(function(d) { wList.push(d.data()); });
+wList.sort(function(a, b) { return new Date(b.withdrawTime || b.createdAt) - new Date(a.withdrawTime || a.createdAt); });
+var latest = wList[0];
+var startTime = latest.withdrawTime || latest.createdAt;
+var elapsed = Date.now() - new Date(startTime).getTime();
+if (elapsed < 24 * 60 * 60 * 1000) {
+startWithdrawTimer(startTime);
+}
+}
+
+var rQuery = query(collection(db, "redeem_requests"), where("userId", "==", user.id), where("status", "==", "pending"));
+var rSnap = await getDocs(rQuery);
+if (!rSnap.empty) {
+var rList = [];
+rSnap.forEach(function(d) { rList.push(d.data()); });
+rList.sort(function(a, b) { return new Date(b.redeemTime || b.createdAt) - new Date(a.redeemTime || a.createdAt); });
+var latestR = rList[0];
+var startTimeR = latestR.redeemTime || latestR.createdAt;
+var elapsedR = Date.now() - new Date(startTimeR).getTime();
+if (elapsedR < 24 * 60 * 60 * 1000) {
+startRedeemTimer(startTimeR);
+}
+}
+} catch(e) {
+console.error("Check active error:", e);
+}
 }
 
 window.setAmount = function(val, el) {
@@ -382,11 +419,11 @@ document.querySelectorAll('.section .quick-btn').forEach(b => b.classList.remove
 var msg = 'आपका <span class="green">विड्रॉल request भेज दी गई है</span>।<br>नीचे timer में देखें — कितना समय बाकी है।';
 showPopup('✅', 'Withdrawal Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।', 'success');
 
-startWithdrawTimer();
+startWithdrawTimer(now);
 
 setTimeout(function() {
 document.getElementById('withdrawTimer').scrollIntoView({behavior:'smooth', block:'center'});
-}, 300);
+}, 400);
 
 } catch(e) {
 document.getElementById('withdrawBtn').disabled = false;
@@ -456,11 +493,11 @@ document.querySelectorAll('.redeem-section .quick-btn').forEach(b => b.classList
 var msg = '<span class="orange">' + coins + ' coins</span> के लिए redeem code request भेजी गई है।<br>आपको <span class="green">₹' + parseFloat(inrAmount).toFixed(2) + '</span> का redeem code मिलेगा।<br>नीचे timer में देखें।';
 showPopup('🎁', 'Redeem Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।', 'success');
 
-startRedeemTimer();
+startRedeemTimer(now);
 
 setTimeout(function() {
 document.getElementById('redeemTimer').scrollIntoView({behavior:'smooth', block:'center'});
-}, 300);
+}, 400);
 
 } catch(e) {
 document.getElementById('redeemBtn').disabled = false;
@@ -470,6 +507,7 @@ showPopup('❌', 'Error', e.message, '', 'error');
 };
 
 loadWinBalance();
+checkActiveRequests();
 </script>
 <script type="module" src="ban-check.js"></script>
 </body>
