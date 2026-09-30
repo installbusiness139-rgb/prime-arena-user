@@ -10,37 +10,47 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .back-btn{font-size:24px;color:white;cursor:pointer}
 .topbar-title{font-size:18px;font-weight:bold}
 .container{padding:20px 15px}
-.win-balance-box{background:linear-gradient(135deg,#6a1b9a,#8e24aa);border-radius:15px;padding:25px;text-align:center;margin-bottom:20px}
+.win-balance-box{background:linear-gradient(135deg,#6a1b9a,#8e24aa);border-radius:15px;padding:30px;text-align:center;margin-bottom:20px}
 .win-balance-label{font-size:14px;color:#ddd;margin-bottom:10px}
 .win-balance-amount{display:flex;justify-content:center;align-items:center;gap:10px}
-.win-coin{font-size:35px}
-.win-number{font-size:40px;font-weight:bold;color:white}
-.section{background:#1a1f3a;border-radius:15px;padding:20px;margin-bottom:20px;border:1px solid #ffa500}
-.section-label{font-size:14px;color:#ccc;margin-bottom:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.section-label span{color:#ffa500;font-size:12px}
-.dropdown{width:100%;background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:15px;color:white;font-size:15px;outline:none;margin-bottom:15px;cursor:pointer}
-.upi-input{width:100%;background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:15px;color:white;font-size:15px;outline:none;margin-bottom:15px;font-family:inherit}
+.win-coin{font-size:38px}
+.win-number{font-size:42px;font-weight:bold;color:white}
+.section{background:#1a1f3a;border-radius:15px;padding:25px 20px;margin-bottom:20px;border:1px solid #ffa500}
+.section-label{font-size:15px;color:#ccc;margin-bottom:18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:bold}
+.section-label span{color:#ffa500;font-size:12px;font-weight:normal}
+.dropdown{width:100%;background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:18px 15px;color:white;font-size:16px;outline:none;margin-bottom:18px;cursor:pointer}
+.upi-input{width:100%;background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:18px 15px;color:white;font-size:16px;outline:none;margin-bottom:18px;font-family:inherit}
 .upi-input:focus{border-color:#ffa500}
 .upi-input::placeholder{color:#666}
-.amount-input-box{display:flex;align-items:center;background:#0a0e27;border-radius:10px;padding:15px;margin-bottom:15px;border:1px solid #2a2f4a}
-.rupee-sign{font-size:28px;color:#ffa500;margin-right:10px}
-.amount-input{background:transparent;border:none;color:white;font-size:24px;font-weight:bold;outline:none;width:100%}
+.amount-input-box{display:flex;align-items:center;background:#0a0e27;border-radius:10px;padding:18px 15px;margin-bottom:18px;border:1px solid #2a2f4a}
+.rupee-sign{font-size:30px;color:#ffa500;margin-right:12px}
+.amount-input{background:transparent;border:none;color:white;font-size:26px;font-weight:bold;outline:none;width:100%}
 .amount-input::placeholder{color:#666}
 .quick-buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.quick-btn{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:12px;color:white;font-size:15px;font-weight:bold;cursor:pointer}
+.quick-btn{background:#0a0e27;border:1px solid #2a2f4a;border-radius:10px;padding:14px;color:white;font-size:15px;font-weight:bold;cursor:pointer}
 .quick-btn.selected{background:#ffa500;color:#0a0e27;border-color:#ffa500}
 .button-row{display:flex;gap:10px;margin-bottom:20px}
-.cancel-btn{flex:1;padding:16px;background:#ff3131;border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
-.withdraw-btn{flex:1;padding:16px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
+.cancel-btn{flex:1;padding:18px;background:#ff3131;border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
+.withdraw-btn{flex:1;padding:18px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:12px;color:white;font-size:16px;font-weight:bold;cursor:pointer}
 .withdraw-btn:disabled{opacity:.5;cursor:not-allowed}
-.redeem-section{background:#1a1f3a;border-radius:15px;padding:20px;margin-bottom:20px;border:1px solid #6a1b9a}
-.redeem-title{font-size:15px;color:#ffa500;font-weight:bold;margin-bottom:8px}
-.redeem-note{font-size:11px;color:#ffa500;background:rgba(255,165,0,.1);border:1px solid #ffa500;border-radius:8px;padding:10px;margin-bottom:15px;line-height:1.5}
-.redeem-label{font-size:11px;color:#aaa;margin-bottom:6px;display:block}
-.redeem-preview{background:#0a0e27;border:1px dashed #6a1b9a;border-radius:10px;padding:12px;text-align:center;margin-bottom:15px}
-.redeem-preview .lbl{font-size:10px;color:#888;margin-bottom:4px}
-.redeem-preview .val{font-size:22px;font-weight:bold;color:#00e676}
-.redeem-preview .cut{font-size:10px;color:#ff3131;margin-top:3px}
+.inline-timer{background:#0a0e27;border:2px solid #ffa500;border-radius:14px;padding:22px;margin-bottom:20px;text-align:center;display:none}
+.inline-timer.show{display:block}
+.inline-timer.over{border-color:#ff3131}
+.inline-timer .tlbl{font-size:12px;color:#ffa500;letter-spacing:3px;margin-bottom:12px;font-weight:bold}
+.inline-timer.over .tlbl{color:#ff3131}
+.inline-timer .tval{font-size:42px;font-weight:bold;color:#fff;font-family:monospace;letter-spacing:3px;line-height:1.2}
+.inline-timer.over .tval{color:#ff3131;font-size:20px}
+.inline-timer .tmsg{font-size:13px;color:#00e676;margin-top:15px;line-height:1.6;padding:0 10px}
+.inline-timer.over .tmsg{color:#ff6b6b}
+.inline-timer .tsub{font-size:11px;color:#666;margin-top:10px;line-height:1.5}
+.redeem-section{background:#1a1f3a;border-radius:15px;padding:25px 20px;margin-bottom:20px;border:1px solid #6a1b9a}
+.redeem-title{font-size:16px;color:#ffa500;font-weight:bold;margin-bottom:10px}
+.redeem-note{font-size:12px;color:#ffa500;background:rgba(255,165,0,.1);border:1px solid #ffa500;border-radius:8px;padding:12px;margin-bottom:18px;line-height:1.6}
+.redeem-label{font-size:12px;color:#aaa;margin-bottom:8px;display:block;font-weight:bold}
+.redeem-preview{background:#0a0e27;border:1px dashed #6a1b9a;border-radius:10px;padding:15px;text-align:center;margin-bottom:18px}
+.redeem-preview .lbl{font-size:11px;color:#888;margin-bottom:6px}
+.redeem-preview .val{font-size:26px;font-weight:bold;color:#00e676}
+.redeem-preview .cut{font-size:11px;color:#ff3131;margin-top:4px}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#00c853;color:white;padding:12px 25px;border-radius:25px;font-size:14px;font-weight:bold;display:none;z-index:1000;max-width:90%;text-align:center}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a2f4a;z-index:100}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#666;font-size:11px;padding:5px 10px}
@@ -48,20 +58,14 @@ body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-botto
 .nav-icon{font-size:22px}
 .popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:9999;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(4px)}
 .popup-overlay.show{display:flex}
-.popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:18px;padding:25px 20px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.8)}
-.popup-icon{font-size:50px;margin-bottom:12px;line-height:1}
-.popup-title{color:#fca311;font-size:20px;font-weight:bold;margin-bottom:12px;letter-spacing:.5px}
-.timer-box{background:#0a0e27;border:1px solid #ffa500;border-radius:12px;padding:15px;margin:15px 0}
-.timer-label{font-size:11px;color:#ffa500;letter-spacing:2px;margin-bottom:8px}
-.timer-value{font-size:32px;font-weight:bold;color:#fff;font-family:monospace;letter-spacing:2px}
-.timer-sub{font-size:10px;color:#666;margin-top:5px}
-.popup-msg{color:#ccc;font-size:13px;line-height:1.6;margin-bottom:15px;padding:0 5px}
+.popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:18px;padding:28px 22px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.8)}
+.popup-icon{font-size:55px;margin-bottom:14px;line-height:1}
+.popup-title{color:#fca311;font-size:21px;font-weight:bold;margin-bottom:14px;letter-spacing:.5px}
+.popup-msg{color:#ccc;font-size:14px;line-height:1.7;margin-bottom:18px;padding:0 5px}
 .popup-msg .green{color:#00e676}
 .popup-msg .orange{color:#ffa500}
-.popup-msg .red{color:#ff3131}
-.popup-note{background:rgba(255,49,49,.1);border:1px solid #ff3131;border-radius:8px;padding:10px;font-size:11px;color:#ff6b6b;line-height:1.5;margin-bottom:20px}
-.popup-btn{width:100%;padding:14px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:bold;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
-.popup-btn:active{transform:scale(.97)}
+.popup-note{background:rgba(255,49,49,.1);border:1px solid #ff3131;border-radius:8px;padding:12px;font-size:11px;color:#ff6b6b;line-height:1.6;margin-bottom:20px}
+.popup-btn{width:100%;padding:15px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
 .popup-btn.error{background:linear-gradient(135deg,#ff3131,#ff5252)}
 .popup-btn.warning{background:linear-gradient(135deg,#ff6b00,#ffa500)}
 </style>
@@ -115,6 +119,13 @@ WITHDRAWAL METHOD
 <button type="button" class="withdraw-btn" id="withdrawBtn" onclick="submitWithdraw()">WITHDRAW</button>
 </div>
 
+<div class="inline-timer" id="withdrawTimer">
+<div class="tlbl">⏱ बचा हुआ समय</div>
+<div class="tval" id="withdrawTimerValue">24:00:00</div>
+<div class="tmsg">✅ आपका विड्रॉल 24 घंटे के अंदर successful हो जाएगा।</div>
+<div class="tsub">⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों। अगर कोई suspicious activity पाई गई, तो request cancel हो सकती है।</div>
+</div>
+
 <div class="redeem-section">
 <div class="redeem-title">🎁 REDEEM CODE (FREE FIRE)</div>
 <div class="redeem-note">💡 Note: Redeem Code पर 3% cut लगेगा। जैसे 100 coins = ₹97, 50 coins = ₹48</div>
@@ -125,7 +136,7 @@ WITHDRAWAL METHOD
 <input type="number" class="amount-input" id="redeemCoins" placeholder="0" min="50" max="1000">
 </div>
 
-<div class="quick-buttons" style="margin-bottom:15px">
+<div class="quick-buttons" style="margin-bottom:18px">
 <button type="button" class="quick-btn" onclick="setRedeemAmount(50, this)">50</button>
 <button type="button" class="quick-btn" onclick="setRedeemAmount(100, this)">100</button>
 <button type="button" class="quick-btn" onclick="setRedeemAmount(200, this)">200</button>
@@ -144,19 +155,19 @@ WITHDRAWAL METHOD
 
 <button type="button" class="withdraw-btn" id="redeemBtn" style="width:100%;margin-top:5px" onclick="submitRedeem()">🎁 REQUEST REDEEM CODE</button>
 </div>
-</div>
 
-<div class="toast" id="toast">Request submitted!</div>
+<div class="inline-timer" id="redeemTimer">
+<div class="tlbl">⏱ बचा हुआ समय</div>
+<div class="tval" id="redeemTimerValue">24:00:00</div>
+<div class="tmsg">✅ आपका redeem code 24 घंटे के अंदर WhatsApp पर मिल जाएगा।</div>
+<div class="tsub">⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।</div>
+</div>
+</div>
 
 <div class="popup-overlay" id="customPopup">
 <div class="popup-box">
 <div class="popup-icon" id="popupIcon">✅</div>
 <div class="popup-title" id="popupTitle">Success</div>
-<div class="timer-box" id="timerBox">
-<div class="timer-label">⏱ बचा हुआ समय</div>
-<div class="timer-value" id="timerValue">24:00:00</div>
-<div class="timer-sub">Time Remaining</div>
-</div>
 <div class="popup-msg" id="popupMsg"></div>
 <div class="popup-note" id="popupNote"></div>
 <button class="popup-btn" id="popupBtn" onclick="closePopup()">OK</button>
@@ -169,9 +180,8 @@ WITHDRAWAL METHOD
 <div class="nav-item" onclick="location.href='home.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
 <div class="nav-item active" onclick="location.href='wallet.html'"><span class="nav-icon">💰</span><span>Wallet</span></div>
 <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
-</div>
-
-<script type="module">
+  </div>
+  <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
@@ -192,7 +202,8 @@ var user = {};
 try { user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}'); } catch(e) { user = {}; }
 if (!user.id) { location.href = 'login.html'; }
 
-var timerInterval = null;
+var withdrawTimerInt = null;
+var redeemTimerInt = null;
 
 async function loadWinBalance() {
 try {
@@ -203,7 +214,7 @@ document.getElementById('winBalance').textContent = snap.data().winning || 0;
 } catch(e) { console.error(e); }
 }
 
-window.showPopup = function(icon, title, msg, note, showTimer, type) {
+window.showPopup = function(icon, title, msg, note, type) {
 document.getElementById('popupIcon').textContent = icon || '✅';
 document.getElementById('popupTitle').textContent = title || '';
 document.getElementById('popupMsg').innerHTML = msg || '';
@@ -215,57 +226,78 @@ btn.className = 'popup-btn';
 if (type === 'error') btn.classList.add('error');
 else if (type === 'warning') btn.classList.add('warning');
 
-if (showTimer) {
-document.getElementById('timerBox').style.display = 'block';
-startTimer();
-} else {
-document.getElementById('timerBox').style.display = 'none';
-}
-
 document.getElementById('customPopup').classList.add('show');
 };
 
 window.closePopup = function() {
 document.getElementById('customPopup').classList.remove('show');
-if (timerInterval) {
-clearInterval(timerInterval);
-timerInterval = null;
-}
 };
 
-function startTimer() {
-if (timerInterval) clearInterval(timerInterval);
+function startWithdrawTimer() {
+if (withdrawTimerInt) clearInterval(withdrawTimerInt);
 var startTime = Date.now();
 var total = 24 * 60 * 60 * 1000;
+var timer = document.getElementById('withdrawTimer');
+var valEl = document.getElementById('withdrawTimerValue');
+
+timer.classList.add('show');
+timer.classList.remove('over');
 
 function update() {
-var elapsed = Date.now() - startTime;
-var remaining = total - elapsed;
+var remaining = total - (Date.now() - startTime);
 if (remaining <= 0) {
-document.getElementById('timerValue').textContent = '00:00:00';
-document.getElementById('timerValue').style.color = '#ff3131';
-clearInterval(timerInterval);
+valEl.textContent = 'TIME OVER';
+timer.classList.add('over');
+clearInterval(withdrawTimerInt);
 return;
 }
-var hours = Math.floor(remaining / (60 * 60 * 1000));
-var minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-var seconds = Math.floor((remaining % (60 * 1000)) / 1000);
-var str = String(hours).padStart(2,'0') + ':' + String(minutes).padStart(2,'0') + ':' + String(seconds).padStart(2,'0');
-document.getElementById('timerValue').textContent = str;
+var h = Math.floor(remaining / (60*60*1000));
+var m = Math.floor((remaining % (60*60*1000)) / (60*1000));
+var s = Math.floor((remaining % (60*1000)) / 1000);
+valEl.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
 }
 update();
-timerInterval = setInterval(update, 1000);
+withdrawTimerInt = setInterval(update, 1000);
+}
+
+function startRedeemTimer() {
+if (redeemTimerInt) clearInterval(redeemTimerInt);
+var startTime = Date.now();
+var total = 24 * 60 * 60 * 1000;
+var timer = document.getElementById('redeemTimer');
+var valEl = document.getElementById('redeemTimerValue');
+
+timer.classList.add('show');
+timer.classList.remove('over');
+
+function update() {
+var remaining = total - (Date.now() - startTime);
+if (remaining <= 0) {
+valEl.textContent = 'TIME OVER';
+timer.classList.add('over');
+clearInterval(redeemTimerInt);
+return;
+}
+var h = Math.floor(remaining / (60*60*1000));
+var m = Math.floor((remaining % (60*60*1000)) / (60*1000));
+var s = Math.floor((remaining % (60*1000)) / 1000);
+valEl.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+update();
+redeemTimerInt = setInterval(update, 1000);
 }
 
 window.setAmount = function(val, el) {
 document.getElementById('withdrawAmount').value = val;
-document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected'));
+var sec = el.closest('.section');
+if (sec) { sec.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected')); }
 el.classList.add('selected');
 };
 
 window.setRedeemAmount = function(val, el) {
 document.getElementById('redeemCoins').value = val;
-document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected'));
+var sec = el.closest('.redeem-section');
+if (sec) { sec.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected')); }
 el.classList.add('selected');
 var inr = (val * 0.97).toFixed(2);
 var cut = (val * 0.03).toFixed(2);
@@ -298,17 +330,17 @@ var upiId = document.getElementById('upiId').value.trim();
 var amount = document.getElementById('withdrawAmount').value;
 
 if (!upiId || !upiId.includes('@')) {
-showPopup('⚠️', 'Invalid UPI ID', 'Please enter a valid UPI ID (e.g. name@upi)', '', false, 'warning');
+showPopup('⚠️', 'Invalid UPI ID', 'Please enter a valid UPI ID (e.g. name@upi)', '', 'warning');
 return;
 }
 
 if (!amount || amount < 50) {
-showPopup('⚠️', 'Invalid Amount', 'Minimum withdrawal amount is ₹50', '', false, 'warning');
+showPopup('⚠️', 'Invalid Amount', 'Minimum withdrawal amount is ₹50', '', 'warning');
 return;
 }
 
 if (amount > 1000) {
-showPopup('⚠️', 'Limit Exceeded', 'Maximum withdrawal amount is ₹1000', '', false, 'warning');
+showPopup('⚠️', 'Limit Exceeded', 'Maximum withdrawal amount is ₹1000', '', 'warning');
 return;
 }
 
@@ -321,7 +353,7 @@ var userData = snap.data();
 var winBalance = userData.winning || 0;
 
 if (winBalance < amount) {
-showPopup('❌', 'Insufficient Balance', 'You have only ' + winBalance + ' coins in Win Balance.', '', false, 'error');
+showPopup('❌', 'Insufficient Balance', 'You have only ' + winBalance + ' coins in Win Balance.', '', 'error');
 document.getElementById('withdrawBtn').disabled = false;
 document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
 return;
@@ -343,18 +375,23 @@ createdAt: now
 
 document.getElementById('withdrawBtn').disabled = false;
 document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
-
 document.getElementById('upiId').value = '';
 document.getElementById('withdrawAmount').value = '';
-document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected'));
+document.querySelectorAll('.section .quick-btn').forEach(b => b.classList.remove('selected'));
 
-var msg = 'आपका <span class="green">विड्रॉल 24 घंटे के अंदर</span> successful हो जाएगा।';
-showPopup('✅', 'Withdrawal Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों। अगर कोई suspicious activity पाई गई, तो request cancel हो सकती है।', true, 'success');
+var msg = 'आपका <span class="green">विड्रॉल request भेज दी गई है</span>।<br>नीचे timer में देखें — कितना समय बाकी है।';
+showPopup('✅', 'Withdrawal Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।', 'success');
+
+startWithdrawTimer();
+
+setTimeout(function() {
+document.getElementById('withdrawTimer').scrollIntoView({behavior:'smooth', block:'center'});
+}, 300);
 
 } catch(e) {
 document.getElementById('withdrawBtn').disabled = false;
 document.getElementById('withdrawBtn').textContent = 'WITHDRAW';
-showPopup('❌', 'Error', e.message, '', false, 'error');
+showPopup('❌', 'Error', e.message, '', 'error');
 }
 };
 
@@ -363,17 +400,17 @@ var coins = parseInt(document.getElementById('redeemCoins').value) || 0;
 var whatsapp = document.getElementById('redeemWhatsapp').value.trim();
 
 if (!coins || coins < 50) {
-showPopup('⚠️', 'Invalid Coins', 'Minimum 50 coins required for redeem code.', '', false, 'warning');
+showPopup('⚠️', 'Invalid Coins', 'Minimum 50 coins required for redeem code.', '', 'warning');
 return;
 }
 
 if (coins > 1000) {
-showPopup('⚠️', 'Limit Exceeded', 'Maximum 1000 coins allowed per request.', '', false, 'warning');
+showPopup('⚠️', 'Limit Exceeded', 'Maximum 1000 coins allowed per request.', '', 'warning');
 return;
 }
 
 if (!whatsapp || whatsapp.length !== 10 || !/^\d+$/.test(whatsapp)) {
-showPopup('⚠️', 'Invalid WhatsApp Number', 'Please enter a valid 10-digit WhatsApp number.', '', false, 'warning');
+showPopup('⚠️', 'Invalid WhatsApp Number', 'Please enter a valid 10-digit WhatsApp number.', '', 'warning');
 return;
 }
 
@@ -386,7 +423,7 @@ var userData = snap.data();
 var winBalance = userData.winning || 0;
 
 if (winBalance < coins) {
-showPopup('❌', 'Insufficient Balance', 'You have only ' + winBalance + ' coins in Win Balance.', '', false, 'error');
+showPopup('❌', 'Insufficient Balance', 'You have only ' + winBalance + ' coins in Win Balance.', '', 'error');
 document.getElementById('redeemBtn').disabled = false;
 document.getElementById('redeemBtn').textContent = '🎁 REQUEST REDEEM CODE';
 return;
@@ -411,19 +448,24 @@ createdAt: now
 
 document.getElementById('redeemBtn').disabled = false;
 document.getElementById('redeemBtn').textContent = '🎁 REQUEST REDEEM CODE';
-
 document.getElementById('redeemCoins').value = '';
 document.getElementById('redeemWhatsapp').value = '';
 document.getElementById('redeemPreview').style.display = 'none';
-document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('selected'));
+document.querySelectorAll('.redeem-section .quick-btn').forEach(b => b.classList.remove('selected'));
 
-var msg = '<span class="orange">' + coins + ' coins</span> के लिए redeem code request भेजी गई है।<br>आपको <span class="green">₹' + parseFloat(inrAmount).toFixed(2) + '</span> का redeem code मिलेगा।<br><br><span class="green">24 घंटे के अंदर</span> आपके WhatsApp number पर भेज दिया जाएगा।';
-showPopup('🎁', 'Redeem Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों। अगर कोई suspicious activity पाई गई, तो request cancel हो सकती है।', true, 'success');
+var msg = '<span class="orange">' + coins + ' coins</span> के लिए redeem code request भेजी गई है।<br>आपको <span class="green">₹' + parseFloat(inrAmount).toFixed(2) + '</span> का redeem code मिलेगा।<br>नीचे timer में देखें।';
+showPopup('🎁', 'Redeem Request Submitted!', msg, '⚠️ ध्यान दें: यह तभी होगा जब आपकी request genuine हो और details सही हों।', 'success');
+
+startRedeemTimer();
+
+setTimeout(function() {
+document.getElementById('redeemTimer').scrollIntoView({behavior:'smooth', block:'center'});
+}, 300);
 
 } catch(e) {
 document.getElementById('redeemBtn').disabled = false;
 document.getElementById('redeemBtn').textContent = '🎁 REQUEST REDEEM CODE';
-showPopup('❌', 'Error', e.message, '', false, 'error');
+showPopup('❌', 'Error', e.message, '', 'error');
 }
 };
 
@@ -431,4 +473,4 @@ loadWinBalance();
 </script>
 <script type="module" src="ban-check.js"></script>
 </body>
-  </html>
+</html>
