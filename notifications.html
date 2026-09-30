@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Notifications - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:white;font-family:Arial;padding-bottom:80px;min-height:100vh}
+.topbar{display:flex;align-items:center;padding:15px;background:#0d1230;border-bottom:1px solid #2a2f4a;position:sticky;top:0;z-index:100;gap:15px}
+.back-btn{font-size:24px;color:white;cursor:pointer}
+.topbar-title{font-size:16px;font-weight:bold}
+.refresh-btn{margin-left:auto;background:#2a2f4a;border:none;color:#fff;padding:8px 12px;border-radius:6px;font-size:16px;cursor:pointer}
+.container{padding:15px}
+.notif-card{background:#1a1f3a;border-radius:12px;padding:15px;margin-bottom:10px;border-left:4px solid #ffa500;position:relative}
+.notif-card.success{border-left-color:#00c853}
+.notif-card.error{border-left-color:#ff3131}
+.notif-card.info{border-left-color:#0088cc}
+.notif-card.unread{background:#1f2547;box-shadow:0 0 0 1px rgba(255,165,0,0.3)}
+.notif-card.unread::after{content:'NEW';position:absolute;top:10px;right:10px;background:#ff3131;color:#fff;font-size:8px;padding:2px 6px;border-radius:6px;font-weight:bold;letter-spacing:.5px}
+.notif-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:10px}
+.notif-title{font-size:14px;font-weight:bold;color:#fff;flex:1;padding-right:35px}
+.notif-time{font-size:10px;color:#666;white-space:nowrap}
+.notif-msg{font-size:12px;color:#ccc;line-height:1.5}
+.empty{text-align:center;padding:60px 20px;color:#666}
+.empty-icon{font-size:60px;opacity:.5;margin-bottom:15px}
+.empty-text{font-size:15px;margin-bottom:5px}
+.empty-subtext{font-size:12px;color:#444}
+.loading{text-align:center;color:#ffa500;padding:30px;font-size:14px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a2f4a;z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#666;font-size:11px;padding:5px 10px}
+.nav-item.active{color:#ffa500}
+.nav-icon{font-size:22px}
+</style>
+</head>
+<body>
+<div class="topbar">
+<div class="back-btn" onclick="location.href='home.html'">←</div>
+<div class="topbar-title">NOTIFICATIONS</div>
+<button class="refresh-btn" onclick="loadAll()">↻</button>
+</div>
+
+<div class="container">
+<div id="notifList">
+<div class="loading">Loading notifications...</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+<div class="nav-item" onclick="location.href='tournaments.html'"><span class="nav-icon">🎮</span><span>Tournaments</span></div>
+<div class="nav-item" onclick="location.href='leaderboard.html'"><span class="nav-icon">🏆</span><span>Leaderboard</span></div>
+<div class="nav-item" onclick="location.href='home.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
+<div class="nav-item" onclick="location.href='wallet.html'"><span class="nav-icon">💰</span><span>Wallet</span></div>
+<div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
+  </div>
+  <script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
+var user={};
+try{user=JSON.parse(localStorage.getItem('primeArenaUser')||'{}');}catch(e){user={};}
+if(!user.id){location.href='login.html';}
+
+function formatDate(iso){
+if(!iso)return '';
+try{
+var d=new Date(iso);
+var dd=d.getDate().toString().padStart(2,'0');
+var mm=(d.getMonth()+1).toString().padStart(2,'0');
+var yy=d.getFullYear();
+var hh=d.getHours().toString().padStart(2,'0');
+var mn=d.getMinutes().toString().padStart(2,'0');
+return dd+'/'+mm+'/'+yy+' '+hh+':'+mn;
+}catch(e){return iso;}
+}
+
+function loadAll(){
+var container=document.getElementById('notifList');
+container.innerHTML='<div class="loading">Loading notifications...</div>';
+
+var lastRead = localStorage.getItem('lastNotifRead_' + user.id);
+var lastReadTime = lastRead ? new Date(lastRead).getTime() : 0;
+
+var notifications=[];
+
+Promise.all([
+db.collection('withdrawals').where('userId','==',user.id).get(),
+db.collection('redeem_requests').where('userId','==',user.id).get()
+]).then(function(results){
+var wSnap=results[0];
+var rSnap=results[1];
+
+wSnap.forEach(function(doc){
+var d=doc.data();
+var t = d.paidAt || d.rejectedAt || d.createdAt;
+if(!t) return;
+var isUnread = new Date(t).getTime() > lastReadTime;
+
+if(d.status==='paid'){
+notifications.push({type:'success',icon:'✅',title:'Withdrawal Successful',msg:'₹'+d.amount+' has been sent to your UPI ID '+d.upiId,time:t,unread:isUnread});
+}else if(d.status==='rejected'){
+notifications.push({type:'error',icon:'❌',title:'Withdrawal Rejected',msg:'Your withdrawal request of ₹'+d.amount+' has been rejected by admin.',time:t,unread:isUnread});
+}else if(d.status==='pending'){
+notifications.push({type:'info',icon:'⏳',title:'Withdrawal Processing',msg:'Your withdrawal of ₹'+d.amount+' is being processed. Will be done within 24 hours.',time:t,unread:isUnread});
+}
+});
+
+rSnap.forEach(function(doc){
+var d=doc.data();
+var t = d.completedAt || d.rejectedAt || d.createdAt;
+if(!t) return;
+var isUnread = new Date(t).getTime() > lastReadTime;
+
+if(d.status==='completed'){
+notifications.push({type:'success',icon:'🎁',title:'Redeem Code Sent',msg:'Your redeem code for '+d.coins+' coins (₹'+d.amountINR+') has been sent on WhatsApp ('+d.whatsappNumber+').',time:t,unread:isUnread});
+}else if(d.status==='rejected'){
+notifications.push({type:'error',icon:'❌',title:'Redeem Request Rejected',msg:'Your redeem request for '+d.coins+' coins has been rejected by admin.',time:t,unread:isUnread});
+}else if(d.status==='pending'){
+notifications.push({type:'info',icon:'⏳',title:'Redeem Request Processing',msg:'Your redeem request for '+d.coins+' coins is being processed.',time:t,unread:isUnread});
+}
+});
+
+notifications.sort(function(a,b){
+return new Date(b.time||0)-new Date(a.time||0);
+});
+
+if(notifications.length===0){
+container.innerHTML='<div class="empty"><div class="empty-icon">🔔</div><div class="empty-text">No Notifications</div><div class="empty-subtext">Your updates will appear here</div></div>';
+}else{
+var html='';
+notifications.forEach(function(n){
+html+='<div class="notif-card '+n.type+(n.unread?' unread':'')+'">'+
+'<div class="notif-head">'+
+'<div class="notif-title">'+n.icon+' '+n.title+'</div>'+
+'<div class="notif-time">'+formatDate(n.time)+'</div>'+
+'</div>'+
+'<div class="notif-msg">'+n.msg+'</div>'+
+'</div>';
+});
+container.innerHTML=html;
+}
+
+setTimeout(function(){
+localStorage.setItem('lastNotifRead_' + user.id, new Date().toISOString());
+}, 1500);
+
+}).catch(function(e){
+container.innerHTML='<div class="empty"><div class="empty-icon">X</div><div class="empty-text">Error: '+e.message+'</div></div>';
+});
+}
+
+loadAll();
+</script>
+<script type="module" src="ban-check.js"></script>
+</body>
+</html>
