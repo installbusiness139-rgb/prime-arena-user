@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Redeem Requests - Prime Arena Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:white;font-family:'Arial',sans-serif;padding-bottom:80px;min-height:100vh}
+.topbar{display:flex;align-items:center;padding:15px;background:#0d1230;border-bottom:1px solid #2a2f4a;position:sticky;top:0;z-index:100;gap:15px}
+.back-btn{font-size:24px;color:white;cursor:pointer}
+.topbar-title{font-size:16px;font-weight:bold;display:flex;align-items:center;gap:8px}
+.admin-badge{background:linear-gradient(135deg,#ff6b00,#ffa500);color:white;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:bold}
+.refresh-btn{background:#2a2f4a;border:none;color:#fff;padding:8px 12px;border-radius:6px;font-size:16px;cursor:pointer;margin-left:auto}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:15px}
+.stat{background:#1a1f3a;border:1px solid #2a2f4a;border-radius:10px;padding:12px;text-align:center}
+.stat .lbl{font-size:9px;color:#666;margin-bottom:4px}
+.stat .val{font-size:20px;font-weight:bold}
+.stat.pending .val{color:#ffa500}
+.stat.completed .val{color:#00c853}
+.stat.rejected .val{color:#ff3131}
+.filter-tabs{display:flex;padding:0 15px 15px;gap:8px;overflow-x:auto}
+.filter-tab{padding:10px 18px;background:#1a1f3a;border:1px solid #2a2f4a;border-radius:20px;font-size:12px;color:#ccc;cursor:pointer;white-space:nowrap;font-weight:bold}
+.filter-tab.active{background:linear-gradient(135deg,#6a1b9a,#8e24aa);color:white;border-color:#8e24aa}
+.redeem-list{padding:0 15px}
+.redeem-card{background:#1a1f3a;border-radius:12px;padding:15px;margin-bottom:12px;border:1px solid #2a2f4a;border-left:4px solid #6a1b9a}
+.redeem-card.completed{border-left-color:#00c853}
+.redeem-card.rejected{border-left-color:#ff3131}
+.redeem-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.redeem-amount{font-size:20px;font-weight:bold;color:#ffa500}
+.redeem-status{font-size:10px;padding:4px 10px;border-radius:10px;font-weight:bold;text-transform:uppercase}
+.status-pending{background:#ffa500;color:#0a0e27}
+.status-completed{background:#00c853;color:white}
+.status-rejected{background:#ff3131;color:white}
+.redeem-details{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;font-size:12px}
+.detail-row{display:flex;justify-content:space-between}
+.detail-label{color:#666}
+.detail-value{color:#ccc;font-weight:500;word-break:break-all;text-align:right;max-width:60%}
+.detail-value.coins{color:#ffa500;font-weight:bold}
+.detail-value.inr{color:#00e676;font-weight:bold}
+.detail-value.whatsapp{color:#25d366;font-family:monospace;letter-spacing:1px}
+.timer-display{background:#0a0e27;border:2px solid #ff5252;border-radius:10px;padding:12px;margin-bottom:12px;text-align:center}
+.timer-display.over{border-color:#ff3131;background:rgba(255,49,49,0.15)}
+.timer-display .tlbl{font-size:10px;color:#ff5252;letter-spacing:2px;margin-bottom:5px;font-weight:bold}
+.timer-display.over .tlbl{color:#ff3131}
+.timer-display .tval{font-size:20px;font-weight:bold;color:#fff;font-family:monospace;letter-spacing:2px}
+.timer-display.over .tval{color:#ff3131;font-size:14px}
+.code-input-box{margin-bottom:10px}
+.code-input-box label{display:block;font-size:10px;color:#aaa;margin-bottom:5px;font-weight:bold;letter-spacing:.5px}
+.code-input{width:100%;padding:12px;background:#0a0e27;border:1px solid #2a2f4a;border-radius:8px;color:#fff;font-size:13px;outline:none;font-family:monospace;letter-spacing:1px}
+.code-input:focus{border-color:#00c853}
+.action-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.send-btn{flex:1;min-width:100px;padding:12px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:8px;color:white;font-size:12px;font-weight:bold;cursor:pointer}
+.reject-btn{flex:1;min-width:100px;padding:12px;background:linear-gradient(135deg,#ff3131,#ff5252);border:none;border-radius:8px;color:white;font-size:12px;font-weight:bold;cursor:pointer}
+.wa-btn{flex:1;min-width:100px;padding:12px;background:linear-gradient(135deg,#25d366,#128c7e);border:none;border-radius:8px;color:white;font-size:12px;font-weight:bold;cursor:pointer;text-decoration:none;text-align:center;display:inline-block}
+.empty-state{text-align:center;padding:60px 20px;color:#666}
+.empty-icon{font-size:60px;margin-bottom:15px;opacity:.5}
+.empty-text{font-size:15px;margin-bottom:5px}
+.empty-subtext{font-size:12px;color:#444}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#00c853;color:white;padding:12px 25px;border-radius:25px;font-size:13px;font-weight:bold;display:none;z-index:1000;max-width:90%;text-align:center}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:8px 0;border-top:1px solid #2a2f4a;z-index:100}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:#666;font-size:9px;padding:5px 8px;flex:1}
+.nav-item.active{color:#ffa500}
+.nav-icon{font-size:20px}
+.popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:9999;justify-content:center;align-items:center;padding:20px}
+.popup-overlay.show{display:flex}
+.popup-box{background:#0f121d;border:1px solid #d4af37;border-radius:14px;padding:25px 20px;width:100%;max-width:360px;text-align:center}
+.popup-icon{font-size:45px;margin-bottom:12px}
+.popup-title{color:#fca311;font-size:19px;font-weight:bold;margin-bottom:10px}
+.popup-msg{color:#ccc;font-size:14px;line-height:1.6;margin-bottom:20px}
+.popup-buttons{display:flex;gap:10px}
+.popup-btn{flex:1;padding:13px;border:none;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;text-transform:uppercase}
+.popup-btn-cancel{background:#2a2d3e;color:#fff}
+.popup-btn-confirm{background:linear-gradient(135deg,#00c853,#00e676);color:#fff}
+.popup-btn-danger{background:linear-gradient(135deg,#ff3131,#ff5252);color:#fff}
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:99999}
+.loading-overlay.show{display:flex}
+.spinner{width:60px;height:60px;border:5px solid #1a1f3a;border-top-color:#ffa500;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:15px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:#ffa500;font-size:14px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="topbar">
+<div class="back-btn" onclick="location.href='admin.html'">←</div>
+<div class="topbar-title">Redeem Requests<span class="admin-badge">ADMIN</span></div>
+<button class="refresh-btn" onclick="loadRedeems()">↻</button>
+</div>
+
+<div class="stats">
+<div class="stat pending"><div class="lbl">PENDING</div><div class="val" id="statPending">0</div></div>
+<div class="stat completed"><div class="lbl">COMPLETED</div><div class="val" id="statCompleted">0</div></div>
+<div class="stat rejected"><div class="lbl">REJECTED</div><div class="val" id="statRejected">0</div></div>
+</div>
+
+<div class="filter-tabs">
+<div class="filter-tab active" onclick="filterRedeems('pending', this)">Pending</div>
+<div class="filter-tab" onclick="filterRedeems('completed', this)">Completed</div>
+<div class="filter-tab" onclick="filterRedeems('rejected', this)">Rejected</div>
+<div class="filter-tab" onclick="filterRedeems('all', this)">All</div>
+</div>
+
+<div class="redeem-list" id="redeemList">
+<div class="empty-state">
+<div class="empty-icon">⏳</div>
+<div class="empty-text">Loading redeem requests...</div>
+</div>
+</div>
+
+<div class="toast" id="toast">Success!</div>
+
+<div class="popup-overlay" id="customPopup">
+<div class="popup-box">
+<div class="popup-icon" id="popupIcon">⚠️</div>
+<div class="popup-title" id="popupTitle">Confirm</div>
+<div class="popup-msg" id="popupMsg">Message</div>
+<div class="popup-buttons" id="popupButtons"></div>
+</div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+<div class="spinner"></div>
+<div class="loading-text" id="loadingText">Processing...</div>
+</div>
+
+<div class="bottom-nav">
+<div class="nav-item" onclick="location.href='admin.html'"><span class="nav-icon">🏠</span><span>Dashboard</span></div>
+<div class="nav-item" onclick="location.href='admin-users.html'"><span class="nav-icon">👥</span><span>Users</span></div>
+<div class="nav-item" onclick="location.href='admin-tournaments.html'"><span class="nav-icon">🎮</span><span>Matches</span></div>
+<div class="nav-item" onclick="location.href='admin-withdrawals.html'"><span class="nav-icon">💸</span><span>Withdrawals</span></div>
+<div class="nav-item" onclick="location.href='admin-settings.html'"><span class="nav-icon">⚙️</span><span>Settings</span></div>
+  </div>
+  <script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
+var currentFilter='pending';
+var allRedeems=[];
+var timerIntervals=[];
+
+function clearAllTimers(){
+timerIntervals.forEach(function(t){clearInterval(t)});
+timerIntervals=[];
+}
+
+function formatTimeRemaining(startTimeStr){
+var start=new Date(startTimeStr).getTime();
+var now=Date.now();
+var total=24*60*60*1000;
+var remaining=total-(now-start);
+if(remaining<=0)return null;
+var h=Math.floor(remaining/(60*60*1000));
+var m=Math.floor((remaining%(60*60*1000))/(60*1000));
+var s=Math.floor((remaining%(60*1000))/1000);
+return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+function startAllTimers(){
+clearAllTimers();
+document.querySelectorAll('[data-timer-for]').forEach(function(el){
+var rId=el.getAttribute('data-timer-for');
+var r=allRedeems.find(function(x){return x.id===rId});
+if(!r)return;
+var startTime=r.redeemTime||r.createdAt;
+if(!startTime)return;
+function update(){
+var rem=formatTimeRemaining(startTime);
+var valEl=el.querySelector('.tval');
+var lblEl=el.querySelector('.tlbl');
+if(rem===null){
+el.classList.add('over');
+if(valEl)valEl.textContent='⏰ TIME OVER';
+if(lblEl)lblEl.textContent='DEADLINE CROSSED';
+}else{
+el.classList.remove('over');
+if(valEl)valEl.textContent='⏱ '+rem;
+if(lblEl)lblEl.textContent='बचा हुआ समय';
+}
+}
+update();
+timerIntervals.push(setInterval(update,1000));
+});
+}
+
+function showPopup(icon,title,msg,buttons){
+document.getElementById('popupIcon').textContent=icon;
+document.getElementById('popupTitle').textContent=title;
+document.getElementById('popupMsg').textContent=msg;
+var btnRow=document.getElementById('popupButtons');
+btnRow.innerHTML='';
+buttons.forEach(function(b){
+var btn=document.createElement('button');
+btn.textContent=b.label;
+btn.className='popup-btn '+(b.style||'popup-btn-confirm');
+btn.onclick=function(){
+document.getElementById('customPopup').classList.remove('show');
+if(b.action)b.action();
+};
+btnRow.appendChild(btn);
+});
+document.getElementById('customPopup').classList.add('show');
+}
+
+function showLoading(text){
+document.getElementById('loadingText').textContent=text||'Processing...';
+document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading(){
+document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+function showToast(msg){
+var t=document.getElementById('toast');
+t.textContent=msg;
+t.style.display='block';
+setTimeout(function(){t.style.display='none'},3000);
+}
+
+function loadRedeems(){
+db.collection('redeem_requests').get().then(function(snapshot){
+allRedeems=[];
+snapshot.forEach(function(doc){
+var d=doc.data();
+d.id=doc.id;
+allRedeems.push(d);
+});
+allRedeems.sort(function(a,b){
+return new Date(b.createdAt||0)-new Date(a.createdAt||0);
+});
+updateStats();
+displayRedeems();
+}).catch(function(e){
+document.getElementById('redeemList').innerHTML='<div class="empty-state"><div class="empty-icon">X</div><div class="empty-text">Error: '+e.message+'</div></div>';
+});
+}
+
+function updateStats(){
+var p=0,c=0,r=0;
+allRedeems.forEach(function(x){
+if(x.status==='pending'||!x.status)p++;
+else if(x.status==='completed')c++;
+else if(x.status==='rejected')r++;
+});
+document.getElementById('statPending').textContent=p;
+document.getElementById('statCompleted').textContent=c;
+document.getElementById('statRejected').textContent=r;
+}
+
+function filterRedeems(f,el){
+currentFilter=f;
+document.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active')});
+el.classList.add('active');
+displayRedeems();
+}
+
+function displayRedeems(){
+clearAllTimers();
+var list=document.getElementById('redeemList');
+var filtered=allRedeems.filter(function(r){
+if(currentFilter==='all')return true;
+if(currentFilter==='pending')return !r.status||r.status==='pending';
+return r.status===currentFilter;
+});
+
+if(filtered.length===0){
+list.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-text">No Requests Found</div><div class="empty-subtext">No '+currentFilter+' redeem requests.</div></div>';
+return;
+}
+
+var html='';
+filtered.forEach(function(r){
+var status=r.status||'pending';
+var date=new Date(r.createdAt);
+var timeStr=date.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+
+var timerHtml='';
+if(status==='pending'){
+timerHtml='<div class="timer-display" data-timer-for="'+r.id+'">'+
+'<div class="tlbl">बचा हुआ समय</div>'+
+'<div class="tval">⏱ 24:00:00</div>'+
+'</div>';
+}
+
+var actionsHtml='';
+if(status==='pending'){
+actionsHtml='<div class="code-input-box">'+
+'<label>🎁 REDEEM CODE (डालकर भेजो)</label>'+
+'<input type="text" class="code-input" id="code-'+r.id+'" placeholder="e.g. FF9MJ31CXKR5">'+
+'</div>'+
+'<div class="action-buttons">'+
+'<button class="send-btn" onclick="sendCode(\''+r.id+'\')">📤 SEND CODE</button>'+
+'<button class="reject-btn" onclick="rejectRedeem(\''+r.id+'\')">✗ REJECT</button>'+
+'</div>';
+}else if(status==='completed'){
+actionsHtml='<div class="action-buttons">'+
+'<a class="wa-btn" href="https://wa.me/91'+r.whatsappNumber+'" target="_blank">💬 WhatsApp</a>'+
+'<button class="reject-btn" onclick="deleteRedeem(\''+r.id+'\')">🗑 DELETE</button>'+
+'</div>';
+}else{
+actionsHtml='<div class="action-buttons">'+
+'<button class="send-btn" onclick="deleteRedeem(\''+r.id+'\')">🗑 DELETE</button>'+
+'</div>';
+}
+
+var codeDisplay='';
+if(r.redeemCode){
+codeDisplay='<div class="detail-row"><span class="detail-label">Code Sent:</span><span class="detail-value" style="color:#00e676;font-family:monospace">'+r.redeemCode+'</span></div>';
+}
+
+html+='<div class="redeem-card '+status+'">'+
+'<div class="redeem-header">'+
+'<div class="redeem-amount">🪙 '+r.coins+' coins</div>'+
+'<div class="redeem-status status-'+status+'">'+status+'</div>'+
+'</div>'+
+
+'<div class="redeem-details">'+
+'<div class="detail-row"><span class="detail-label">User:</span><span class="detail-value">'+(r.userName||'Unknown')+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">'+(r.userEmail||'-')+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Coins:</span><span class="detail-value coins">'+r.coins+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Amount:</span><span class="detail-value inr">₹'+r.amountINR+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Cut (3%):</span><span class="detail-value" style="color:#ff3131">₹'+r.cutINR+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">WhatsApp:</span><span class="detail-value whatsapp">'+r.whatsappNumber+'</span></div>'+
+'<div class="detail-row"><span class="detail-label">Time:</span><span class="detail-value">'+timeStr+'</span></div>'+
+codeDisplay+
+'</div>'+
+
+timerHtml+
+actionsHtml+
+'</div>';
+});
+
+list.innerHTML=html;
+startAllTimers();
+}
+
+function sendCode(id){
+var r=allRedeems.find(function(x){return x.id===id});
+if(!r)return;
+var codeInput=document.getElementById('code-'+id);
+var code=codeInput.value.trim();
+
+if(!code){
+showPopup('⚠️','Code Missing','Please enter the redeem code before sending.','','warning');
+return;
+}
+
+showPopup('📤','Send Code?','Send this code to '+r.userName+' on WhatsApp?\n\nCode: '+code,'','success',function(){
+showLoading('Sending code...');
+db.collection('redeem_requests').doc(id).update({
+status:'completed',
+redeemCode:code,
+completedAt:new Date().toISOString()
+}).then(function(){
+hideLoading();
+var msg='🎁 *Prime Arena - Redeem Code*\n\nHello '+r.userName+'!\n\nYour redeem code is ready:\n\n*'+code+'*\n\n📌 For: '+r.coins+' coins (₹'+r.amountINR+')\n\n⚠️ Use this code in Free Fire app.\n\nThank you for playing with Prime Arena! 🎮';
+var waUrl='https://wa.me/91'+r.whatsappNumber+'?text='+encodeURIComponent(msg);
+window.open(waUrl,'_blank');
+showToast('✅ Code sent! Request completed.');
+loadRedeems();
+}).catch(function(e){
+hideLoading();
+showPopup('❌','Error',e.message,'','error');
+});
+});
+}
+
+function rejectRedeem(id){
+var r=allRedeems.find(function(x){return x.id===id});
+if(!r)return;
+showPopup('⚠️','Reject Request?','Reject '+r.userName+'\'s redeem request of '+r.coins+' coins?','','danger',function(){
+showLoading('Rejecting...');
+db.collection('redeem_requests').doc(id).update({
+status:'rejected',
+rejectedAt:new Date().toISOString()
+}).then(function(){
+hideLoading();
+showToast('Request rejected.');
+loadRedeems();
+}).catch(function(e){
+hideLoading();
+showPopup('❌','Error',e.message,'','error');
+});
+});
+}
+
+function deleteRedeem(id){
+showPopup('🗑','Delete Request?','This will permanently delete this request.','','danger',function(){
+showLoading('Deleting...');
+db.collection('redeem_requests').doc(id).delete().then(function(){
+hideLoading();
+showToast('Request deleted.');
+loadRedeems();
+}).catch(function(e){
+hideLoading();
+showPopup('❌','Error',e.message,'','error');
+});
+});
+}
+
+document.getElementById('customPopup').addEventListener('click',function(e){
+if(e.target===this)this.classList.remove('show');
+});
+
+loadRedeems();
+</script>
+</body>
+  </html>
