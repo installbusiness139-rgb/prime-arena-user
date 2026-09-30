@@ -12,12 +12,14 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .welcome-text{font-size:11px;color:#ccc}
 .username{font-size:14px;color:#ffa500;font-weight:bold}
 .topbar-right{display:flex;align-items:center;gap:10px}
-.coin-balance{display:flex;align-items:center;gap:5px;background:#1a1f3a;padding:6px 12px;border-radius:20px;border:1px solid #ffa500;min-width:70px;justify-content:center}
+.coin-balance{display:flex;align-items:center;gap:5px;background:#1a1f3a;padding:6px 12px;border-radius:20px;border:1px solid #ffa500;min-width:70px;justify-content:center;cursor:pointer;transition:.2s}
+.coin-balance:active{transform:scale(.95);background:#2a2f4a}
 .coin-icon{color:#ffa500;font-size:16px}
 .coin-count{font-size:14px;font-weight:bold;color:#ffa500}
 .coin-count.loading{color:#888;font-size:12px}
-.notification-bell{position:relative;font-size:22px;cursor:pointer}
-.notification-badge{position:absolute;top:-5px;right:-5px;background:#ff3131;color:white;font-size:9px;padding:2px 5px;border-radius:10px}
+.notification-bell{position:relative;font-size:22px;cursor:pointer;padding:5px;transition:.2s}
+.notification-bell:active{transform:scale(.9)}
+.notification-badge{position:absolute;top:-3px;right:-3px;background:#ff3131;color:white;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold;min-width:16px;text-align:center;display:none}
 .quick-icons{display:flex;justify-content:space-around;padding:15px 10px;gap:8px}
 .quick-icon{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
 .quick-icon-img{width:45px;height:45px;background:#1a1f3a;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:20px;border:2px solid #ffa500}
@@ -37,8 +39,6 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .nav-item.active{color:#ffa500}
 .nav-icon{font-size:22px}
 .support-btn{position:fixed;bottom:90px;right:20px;width:55px;height:55px;background:#ff3131;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:26px;cursor:pointer;box-shadow:0 5px 15px rgba(255,49,49,.4);z-index:99}
-
-/* ============ BAN POPUP ============ */
 .ban-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:99999;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(5px)}
 .ban-overlay.show{display:flex}
 .ban-box{background:#0f121d;border:1px solid #ff3131;border-radius:18px;padding:30px 22px;width:100%;max-width:360px;text-align:center;box-shadow:0 10px 40px rgba(255,49,49,.3)}
@@ -47,7 +47,6 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .ban-msg{font-size:14px;color:#ccc;line-height:1.6;margin-bottom:25px}
 .ban-msg b{color:#ffa500}
 .ban-btn{width:100%;padding:15px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px}
-.ban-btn:active{transform:scale(.97)}
 </style>
 </head>
 <body>
@@ -60,13 +59,13 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 </div>
 </div>
 <div class="topbar-right">
-<div class="coin-balance">
+<div class="coin-balance" onclick="location.href='wallet.html'">
 <span class="coin-icon">🪙</span>
 <span class="coin-count loading" id="coinBalance">...</span>
 </div>
-<div class="notification-bell">
+<div class="notification-bell" onclick="location.href='notifications.html'">
 🔔
-<span class="notification-badge">1</span>
+<span class="notification-badge" id="notifBadge">0</span>
 </div>
 </div>
 </div>
@@ -128,7 +127,6 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
 </div>
 
-<!-- ============ BAN POPUP HTML ============ -->
 <div class="ban-overlay" id="banOverlay">
 <div class="ban-box">
 <div class="ban-icon">🔒</div>
@@ -143,7 +141,7 @@ Please contact support for more information.
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
@@ -174,14 +172,13 @@ document.getElementById('userName').textContent = user.name;
 }
 
 var firstLoadDone = false;
-var banDetected = false;
 
+// ============ LOAD BALANCE ============
 async function loadUserBalance() {
 var balanceEl = document.getElementById('coinBalance');
 try {
 const userDocRef = doc(db, "users", user.id);
 const userDocSnap = await getDoc(userDocRef);
-
 if (userDocSnap.exists()) {
 var data = userDocSnap.data();
 var balance = data.balance || 0;
@@ -214,19 +211,57 @@ const userRef = doc(db, "users", user.id);
 onSnapshot(userRef, function(snapshot) {
 if (snapshot.exists()) {
 var data = snapshot.data();
-if (data.isBlocked === true && !banDetected) {
-banDetected = true;
-// Show beautiful popup instead of browser alert
+if (data.isBlocked === true) {
 document.getElementById('banOverlay').classList.add('show');
 }
 }
 });
 
+// ============ UNREAD NOTIFICATIONS BADGE ============
+async function updateNotifBadge() {
+try {
+var lastRead = localStorage.getItem('lastNotifRead_' + user.id);
+var lastReadTime = lastRead ? new Date(lastRead).getTime() : 0;
+
+var wSnap = await getDocs(query(collection(db, "withdrawals"), where("userId", "==", user.id)));
+var rSnap = await getDocs(query(collection(db, "redeem_requests"), where("userId", "==", user.id)));
+
+var unreadCount = 0;
+
+wSnap.forEach(function(d) {
+var data = d.data();
+var t = data.paidAt || data.rejectedAt || data.createdAt;
+if (!t) return;
+if (new Date(t).getTime() > lastReadTime) unreadCount++;
+});
+
+rSnap.forEach(function(d) {
+var data = d.data();
+var t = data.completedAt || data.rejectedAt || data.createdAt;
+if (!t) return;
+if (new Date(t).getTime() > lastReadTime) unreadCount++;
+});
+
+var badge = document.getElementById('notifBadge');
+if (badge) {
+if (unreadCount > 0) {
+badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+badge.style.display = 'block';
+} else {
+badge.style.display = 'none';
+}
+}
+} catch(e) {
+console.warn('Notif badge error:', e);
+}
+}
+
+updateNotifBadge();
+setInterval(updateNotifBadge, 30000);
 setInterval(loadUserBalance, 5000);
 </script>
 
 <script>
-// Global function to close popup and logout
 function closeAndLogout() {
 try {
 localStorage.removeItem('primeArenaUser');
