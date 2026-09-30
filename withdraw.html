@@ -549,7 +549,15 @@ rBtn.textContent = '🎁 REQUEST REDEEM CODE';
 showPopup('❌', 'Error', e.message, '', 'error');
 }
 };
-
+    // ============ AUTO SCROLL TO REDEEM SECTION ============
+if (location.hash === '#redeem') {
+setTimeout(function() {
+var redeemSection = document.querySelector('.redeem-section');
+if (redeemSection) {
+redeemSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+}, 600);
+                                                                                         }                                                                                     
 loadWinBalance();
 checkActiveRequests();
 </script>
