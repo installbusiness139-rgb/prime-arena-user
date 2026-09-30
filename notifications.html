@@ -23,6 +23,11 @@ body{background:#0a0e27;color:white;font-family:Arial;padding-bottom:80px;min-he
 .notif-title{font-size:14px;font-weight:bold;color:#fff;flex:1;padding-right:35px}
 .notif-time{font-size:10px;color:#666;white-space:nowrap}
 .notif-msg{font-size:12px;color:#ccc;line-height:1.5}
+.redeem-code-box{background:#0a0e27;border:2px dashed #00c853;border-radius:10px;padding:14px;margin-top:12px;text-align:center}
+.redeem-code-label{font-size:10px;color:#00c853;letter-spacing:2px;margin-bottom:8px;font-weight:bold}
+.redeem-code-value{font-size:20px;font-weight:bold;color:#fff;font-family:monospace;letter-spacing:3px;margin-bottom:12px;word-break:break-all}
+.copy-btn{width:100%;padding:12px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:8px;color:white;font-size:13px;font-weight:bold;cursor:pointer}
+.copy-btn:active{transform:scale(.97)}
 .empty{text-align:center;padding:60px 20px;color:#666}
 .empty-icon{font-size:60px;opacity:.5;margin-bottom:15px}
 .empty-text{font-size:15px;margin-bottom:5px}
@@ -53,8 +58,8 @@ body{background:#0a0e27;color:white;font-family:Arial;padding-bottom:80px;min-he
 <div class="nav-item" onclick="location.href='home.html'"><span class="nav-icon">🏠</span><span>Home</span></div>
 <div class="nav-item" onclick="location.href='wallet.html'"><span class="nav-icon">💰</span><span>Wallet</span></div>
 <div class="nav-item" onclick="location.href='profile.html'"><span class="nav-icon">👤</span><span>Profile</span></div>
-  </div>
-  <script>
+</div>
+<script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -77,12 +82,42 @@ return dd+'/'+mm+'/'+yy+' '+hh+':'+mn;
 }catch(e){return iso;}
 }
 
+function copyRedeemCode(code,btn){
+var oldText=btn.textContent;
+function success(){
+btn.textContent='COPIED!';
+btn.style.background='linear-gradient(135deg,#00aaff,#0088cc)';
+setTimeout(function(){
+btn.textContent='COPY CODE';
+btn.style.background='linear-gradient(135deg,#00c853,#00e676)';
+},2000);
+}
+if(navigator.clipboard&&navigator.clipboard.writeText){
+navigator.clipboard.writeText(code).then(success).catch(function(){
+fallbackCopy(code);success();
+});
+}else{
+fallbackCopy(code);success();
+}
+}
+
+function fallbackCopy(text){
+var ta=document.createElement('textarea');
+ta.value=text;
+ta.style.position='fixed';
+ta.style.left='-9999px';
+document.body.appendChild(ta);
+ta.select();
+try{document.execCommand('copy');}catch(e){}
+document.body.removeChild(ta);
+}
+
 function loadAll(){
 var container=document.getElementById('notifList');
 container.innerHTML='<div class="loading">Loading notifications...</div>';
 
-var lastRead = localStorage.getItem('lastNotifRead_' + user.id);
-var lastReadTime = lastRead ? new Date(lastRead).getTime() : 0;
+var lastRead=localStorage.getItem('lastNotifRead_'+user.id);
+var lastReadTime=lastRead?new Date(lastRead).getTime():0;
 
 var notifications=[];
 
@@ -95,9 +130,9 @@ var rSnap=results[1];
 
 wSnap.forEach(function(doc){
 var d=doc.data();
-var t = d.paidAt || d.rejectedAt || d.createdAt;
-if(!t) return;
-var isUnread = new Date(t).getTime() > lastReadTime;
+var t=d.paidAt||d.rejectedAt||d.createdAt;
+if(!t)return;
+var isUnread=new Date(t).getTime()>lastReadTime;
 
 if(d.status==='paid'){
 notifications.push({type:'success',icon:'✅',title:'Withdrawal Successful',msg:'₹'+d.amount+' has been sent to your UPI ID '+d.upiId,time:t,unread:isUnread});
@@ -110,12 +145,22 @@ notifications.push({type:'info',icon:'⏳',title:'Withdrawal Processing',msg:'Yo
 
 rSnap.forEach(function(doc){
 var d=doc.data();
-var t = d.completedAt || d.rejectedAt || d.createdAt;
-if(!t) return;
-var isUnread = new Date(t).getTime() > lastReadTime;
+var t=d.completedAt||d.rejectedAt||d.createdAt;
+if(!t)return;
+var isUnread=new Date(t).getTime()>lastReadTime;
 
 if(d.status==='completed'){
-notifications.push({type:'success',icon:'🎁',title:'Redeem Code Sent',msg:'Your redeem code for '+d.coins+' coins (₹'+d.amountINR+') has been sent on WhatsApp ('+d.whatsappNumber+').',time:t,unread:isUnread});
+notifications.push({
+type:'success',
+icon:'🎁',
+title:'Redeem Code Ready!',
+msg:'Your redeem code for '+d.coins+' coins (₹'+d.amountINR+') is ready. Copy it below:',
+time:t,
+unread:isUnread,
+redeemCode:d.redeemCode||'',
+coins:d.coins,
+amountINR:d.amountINR
+});
 }else if(d.status==='rejected'){
 notifications.push({type:'error',icon:'❌',title:'Redeem Request Rejected',msg:'Your redeem request for '+d.coins+' coins has been rejected by admin.',time:t,unread:isUnread});
 }else if(d.status==='pending'){
@@ -137,15 +182,24 @@ html+='<div class="notif-card '+n.type+(n.unread?' unread':'')+'">'+
 '<div class="notif-title">'+n.icon+' '+n.title+'</div>'+
 '<div class="notif-time">'+formatDate(n.time)+'</div>'+
 '</div>'+
-'<div class="notif-msg">'+n.msg+'</div>'+
+'<div class="notif-msg">'+n.msg+'</div>';
+
+if(n.redeemCode){
+html+='<div class="redeem-code-box">'+
+'<div class="redeem-code-label">YOUR REDEEM CODE</div>'+
+'<div class="redeem-code-value">'+n.redeemCode+'</div>'+
+'<button class="copy-btn" onclick="copyRedeemCode(\''+n.redeemCode+'\',this)">COPY CODE</button>'+
 '</div>';
+}
+
+html+='</div>';
 });
 container.innerHTML=html;
 }
 
 setTimeout(function(){
-localStorage.setItem('lastNotifRead_' + user.id, new Date().toISOString());
-}, 1500);
+localStorage.setItem('lastNotifRead_'+user.id,new Date().toISOString());
+},1500);
 
 }).catch(function(e){
 container.innerHTML='<div class="empty"><div class="empty-icon">X</div><div class="empty-text">Error: '+e.message+'</div></div>';
