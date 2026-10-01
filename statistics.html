@@ -16,23 +16,31 @@
     .stat-card { background: #1a1f3a; border-radius: 12px; padding: 18px; border: 1px solid #2a2f4a; text-align: center; }
     .stat-icon { font-size: 28px; margin-bottom: 8px; }
     .stat-value { font-size: 26px; font-weight: bold; color: #ffa500; margin-bottom: 4px; }
+    .stat-value.loading { color: #666; font-size: 16px; }
     .stat-label { font-size: 11px; color: #ccc; letter-spacing: 0.5px; }
     .section-title { font-size: 15px; font-weight: bold; color: #ffa500; margin-bottom: 12px; padding: 0 5px; }
     .match-card { background: #1a1f3a; border-radius: 12px; padding: 15px; margin-bottom: 12px; border: 1px solid #2a2f4a; border-left: 4px solid #00c853; }
     .match-card.lost { border-left-color: #ff3131; }
+    .match-card.pending { border-left-color: #ffa500; }
     .match-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
     .match-title { font-size: 13px; font-weight: bold; color: white; flex: 1; line-height: 1.4; }
-    .match-rank { font-size: 10px; padding: 3px 10px; border-radius: 10px; font-weight: bold; background: #00c853; color: white; white-space: nowrap; }
+    .match-rank { font-size: 10px; padding: 4px 10px; border-radius: 10px; font-weight: bold; background: #00c853; color: white; white-space: nowrap; }
     .match-rank.lost { background: #ff3131; }
+    .match-rank.pending { background: #ffa500; color: #0a0e27; }
+    .match-rank.win { background: #ffd700; color: #0a0e27; }
     .match-details { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .match-detail-item { background: #0a0e27; border-radius: 8px; padding: 8px 6px; text-align: center; }
-    .match-detail-label { font-size: 9px; color: #666; margin-bottom: 3px; }
+    .match-detail-label { font-size: 9px; color: #666; margin-bottom: 3px; letter-spacing: 0.5px; }
     .match-detail-value { font-size: 13px; color: #ffa500; font-weight: bold; }
     .match-detail-value.win { color: #00c853; }
+    .match-detail-value.lost { color: #ff3131; }
     .empty-state { text-align: center; padding: 60px 20px; color: #666; }
     .empty-icon { font-size: 60px; margin-bottom: 15px; opacity: 0.5; }
     .empty-text { font-size: 15px; margin-bottom: 5px; }
     .empty-subtext { font-size: 12px; color: #444; }
+    .loading-state { text-align: center; padding: 60px 20px; color: #ffa500; font-size: 14px; }
+    .loading-icon { display: inline-block; width: 40px; height: 40px; border: 4px solid #1a1f3a; border-top-color: #ffa500; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #666; font-size: 11px; padding: 5px 10px; }
     .nav-item.active { color: #ffa500; }
@@ -49,31 +57,31 @@
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">🎮</div>
-        <div class="stat-value" id="matchesPlayed">0</div>
+        <div class="stat-value loading" id="matchesPlayed">...</div>
         <div class="stat-label">Matches Played</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">💀</div>
-        <div class="stat-value" id="totalKills">0</div>
+        <div class="stat-value loading" id="totalKills">...</div>
         <div class="stat-label">Total Kills</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">🏆</div>
-        <div class="stat-value" id="totalWins">0</div>
+        <div class="stat-value loading" id="totalWins">...</div>
         <div class="stat-label">Total Wins</div>
       </div>
       <div class="stat-card">
         <div class="stat-icon">🪙</div>
-        <div class="stat-value" id="totalEarned">0</div>
+        <div class="stat-value loading" id="totalEarned">...</div>
         <div class="stat-label">Total Earned</div>
       </div>
     </div>
 
     <div class="section-title">📜 MATCH HISTORY</div>
     <div id="matchHistory">
-      <div class="empty-state">
-        <div class="empty-icon">⏳</div>
-        <div class="empty-text">Loading match history...</div>
+      <div class="loading-state">
+        <div class="loading-icon"></div>
+        <div>Loading match history...</div>
       </div>
     </div>
   </div>
@@ -112,30 +120,67 @@
       measurementId: "G-EQJP1D9C92"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
 
-    var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+    var user = {};
+    try { user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}'); } catch(e) { user = {}; }
+    if (!user.id) { window.location.href = 'login.html'; }
 
-    if (!user.id) {
-      window.location.href = 'login.html';
+    function esc(s) {
+      if (s === undefined || s === null) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fmtDateTime(iso) {
+      if (!iso) return '-';
+      try {
+        var d = new Date(iso);
+        if (isNaN(d.getTime())) return '-';
+        var day = d.getDate().toString().padStart(2, '0');
+        var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var month = months[d.getMonth()];
+        var year = d.getFullYear();
+        var hours = d.getHours().toString().padStart(2, '0');
+        var mins = d.getMinutes().toString().padStart(2, '0');
+        return day + ' ' + month + ' ' + year + ', ' + hours + ':' + mins;
+      } catch(e) { return '-'; }
     }
 
     function loadStats() {
-      // Load user stats
+      // ============ LOAD USER STATS ============
       db.collection("users").doc(user.id).get().then(function(doc) {
         if (doc.exists) {
           var data = doc.data();
           document.getElementById('matchesPlayed').textContent = data.matchesPlayed || 0;
+          document.getElementById('matchesPlayed').classList.remove('loading');
+
           document.getElementById('totalKills').textContent = data.totalKills || 0;
+          document.getElementById('totalKills').classList.remove('loading');
+
           document.getElementById('totalWins').textContent = data.totalWins || 0;
-          document.getElementById('totalEarned').textContent = data.winning || 0;
+          document.getElementById('totalWins').classList.remove('loading');
+
+          document.getElementById('totalEarned').textContent = '🪙 ' + (data.winning || 0);
+          document.getElementById('totalEarned').classList.remove('loading');
+        } else {
+          ['matchesPlayed','totalKills','totalWins','totalEarned'].forEach(function(id) {
+            document.getElementById(id).textContent = '0';
+            document.getElementById(id).classList.remove('loading');
+          });
         }
       }).catch(function(error) {
-        console.error("Error:", error);
+        console.error("User stats error:", error);
+        ['matchesPlayed','totalKills','totalWins','totalEarned'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && el.classList.contains('loading')) {
+            el.textContent = '0';
+            el.classList.remove('loading');
+          }
+        });
       });
 
-      // Load match history (transactions)
+      // ============ LOAD MATCH HISTORY (transactions) ============
       db.collection("transactions")
         .where("userId", "==", user.id)
         .get()
@@ -148,62 +193,110 @@
               matches.push(data);
             }
           });
-          
+
+          // Sort by timestamp DESC (latest first)
           matches.sort(function(a, b) {
-            return new Date(b.timestamp) - new Date(a.timestamp);
+            var ta = new Date(a.timestamp || a.createdAt || 0).getTime();
+            var tb = new Date(b.timestamp || b.createdAt || 0).getTime();
+            return tb - ta;
           });
-          
+
           displayMatchHistory(matches);
-        }).catch(function(error) {
-          console.error("Error:", error);
+        })
+        .catch(function(error) {
+          console.error("Match history error:", error);
           displayMatchHistory([]);
         });
     }
 
     function displayMatchHistory(matches) {
       var container = document.getElementById('matchHistory');
-      
+
       if (matches.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="empty-icon">📜</div><div class="empty-text">No Match History</div><div class="empty-subtext">Join a tournament to see your history here.</div></div>';
+        container.innerHTML =
+          '<div class="empty-state">' +
+            '<div class="empty-icon">📜</div>' +
+            '<div class="empty-text">No Match History</div>' +
+            '<div class="empty-subtext">Join a tournament to see your history here.</div>' +
+          '</div>';
         return;
       }
-      
-      // Group by matchId
+
+      // ============ GROUP BY matchId ============
       var matchGroups = {};
+
       matches.forEach(function(m) {
-        if (!matchGroups[m.matchId]) {
-          matchGroups[m.matchId] = {
-            matchId: m.matchId,
+        var mid = m.matchId || 'unknown_' + m.id;
+
+        if (!matchGroups[mid]) {
+          matchGroups[mid] = {
+            matchId: mid,
             matchTitle: m.matchTitle || 'Tournament Match',
             entry: null,
             win: null,
-            timestamp: m.timestamp
+            latestTime: 0
           };
         }
+
+        var t = new Date(m.timestamp || m.createdAt || 0).getTime();
+
         if (m.type === 'match_entry') {
-          matchGroups[m.matchId].entry = m;
+          matchGroups[mid].entry = m;
+          if (!matchGroups[mid].matchTitle && m.matchTitle) matchGroups[mid].matchTitle = m.matchTitle;
         } else if (m.type === 'match_win') {
-          matchGroups[m.matchId].win = m;
+          matchGroups[mid].win = m;
+          if (!matchGroups[mid].matchTitle && m.matchTitle) matchGroups[mid].matchTitle = m.matchTitle;
         }
+
+        if (t > matchGroups[mid].latestTime) matchGroups[mid].latestTime = t;
       });
-      
+
+      // ============ SORT BY latestTime ============
+      var groupsArr = Object.values(matchGroups);
+      groupsArr.sort(function(a, b) { return b.latestTime - a.latestTime; });
+
+      // ============ RENDER ============
       var html = '';
-      Object.values(matchGroups).forEach(function(g) {
-        var date = new Date(g.timestamp);
-        var timeStr = date.toLocaleString('en-IN', {
-          day: '2-digit', month: 'short',
-          hour: '2-digit', minute: '2-digit'
-        });
-        
-        var isWin = g.win !== null;
-        var kills = g.win ? g.win.kills : 0;
-        var prize = g.win ? g.win.amount : 0;
-        var rank = g.win ? g.win.rank : '-';
-        
-        html += '<div class="match-card ' + (isWin ? '' : 'lost') + '">' +
+
+      groupsArr.forEach(function(g) {
+        var isWin = g.win !== null && (parseInt(g.win.amount) > 0);
+        var isPending = g.win === null; // Match joined, but result not uploaded yet
+
+        var cardClass = 'pending';
+        var rankBadge = '';
+        var kills = 0;
+        var prize = 0;
+        var rank = '-';
+
+        if (isWin) {
+          cardClass = '';
+          rank = g.win.rank || '-';
+          kills = g.win.kills || 0;
+          prize = g.win.amount || 0;
+
+          if (parseInt(rank) === 1) {
+            rankBadge = '<span class="match-rank win">👑 RANK #1</span>';
+          } else {
+            rankBadge = '<span class="match-rank">RANK #' + esc(rank) + '</span>';
+          }
+        } else if (isPending) {
+          cardClass = 'pending';
+          rankBadge = '<span class="match-rank pending">⏳ RESULT PENDING</span>';
+        } else {
+          cardClass = 'lost';
+          rankBadge = '<span class="match-rank lost">❌ LOST</span>';
+          kills = g.win ? (g.win.kills || 0) : 0;
+          prize = g.win ? (g.win.amount || 0) : 0;
+          rank = g.win ? (g.win.rank || '-') : '-';
+        }
+
+        var prizeClass = prize > 0 ? 'win' : 'lost';
+        var prizeDisplay = prize > 0 ? '🪙 +' + prize : '🪙 0';
+
+        html += '<div class="match-card ' + cardClass + '">' +
           '<div class="match-header">' +
-            '<div class="match-title">' + g.matchTitle + '</div>' +
-            '<div class="match-rank ' + (isWin ? '' : 'lost') + '">' + (isWin ? 'RANK #' + rank : 'LOST') + '</div>' +
+            '<div class="match-title">' + esc(g.matchTitle) + '</div>' +
+            rankBadge +
           '</div>' +
           '<div class="match-details">' +
             '<div class="match-detail-item">' +
@@ -212,21 +305,22 @@
             '</div>' +
             '<div class="match-detail-item">' +
               '<div class="match-detail-label">PRIZE</div>' +
-              '<div class="match-detail-value win">🪙 ' + prize + '</div>' +
+              '<div class="match-detail-value ' + prizeClass + '">' + prizeDisplay + '</div>' +
             '</div>' +
             '<div class="match-detail-item">' +
               '<div class="match-detail-label">DATE</div>' +
-              '<div class="match-detail-value">' + timeStr + '</div>' +
+              '<div class="match-detail-value" style="font-size:10px">' + fmtDateTime(g.latestTime) + '</div>' +
             '</div>' +
           '</div>' +
         '</div>';
       });
-      
+
       container.innerHTML = html;
     }
 
     loadStats();
   </script>
+  
   <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+  </html>
