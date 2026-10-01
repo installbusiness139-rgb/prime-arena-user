@@ -3,6 +3,8 @@
 <head>
   <title>Leaderboard - Prime Arena</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -14,7 +16,6 @@
       min-height: 100vh;
     }
     
-    /* Top Bar */
     .topbar {
       display: flex;
       align-items: center;
@@ -38,7 +39,6 @@
       color: white;
     }
     
-    /* Tabs */
     .tabs {
       display: flex;
       background: #0d1230;
@@ -63,7 +63,6 @@
       border-bottom: 3px solid #ffa500;
     }
     
-    /* Header Row */
     .header-row {
       display: flex;
       background: linear-gradient(90deg, #ff6b00, #ffa500);
@@ -75,23 +74,10 @@
       color: #0a0e27;
     }
     
-    .header-position {
-      width: 60px;
-      text-align: center;
-    }
+    .header-position { width: 60px; text-align: center; }
+    .header-name { flex: 1; padding-left: 15px; }
+    .header-winning { width: 80px; text-align: right; padding-right: 10px; }
     
-    .header-name {
-      flex: 1;
-      padding-left: 15px;
-    }
-    
-    .header-winning {
-      width: 80px;
-      text-align: right;
-      padding-right: 10px;
-    }
-    
-    /* Player Row */
     .player-list {
       padding: 0 15px;
     }
@@ -153,12 +139,6 @@
       padding-right: 10px;
     }
     
-    .coin-icon {
-      font-size: 14px;
-      margin-right: 3px;
-    }
-    
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -181,7 +161,28 @@
       color: #444;
     }
     
-    /* Bottom Navigation */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #ffa500;
+      font-size: 15px;
+    }
+    
+    .loading-icon {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #1a1f3a;
+      border-top-color: #ffa500;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -206,43 +207,36 @@
       padding: 5px 10px;
     }
     
-    .nav-item.active {
-      color: #ffa500;
-    }
-    
-    .nav-icon {
-      font-size: 22px;
-    }
+    .nav-item.active { color: #ffa500; }
+    .nav-icon { font-size: 22px; }
   </style>
 </head>
 <body>
-  <!-- Top Bar -->
   <div class="topbar">
     <div class="back-btn" onclick="window.location.href='home.html'">←</div>
     <div class="topbar-title">LEADERBOARD</div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
-    <div class="tab active" onclick="switchTab('daily', this)">Daily</div>
-    <div class="tab" onclick="switchTab('weekly', this)">Weekly</div>
-    <div class="tab" onclick="switchTab('monthly', this)">Monthly</div>
-    <div class="tab" onclick="switchTab('lifetime', this)">Lifetime</div>
+    <div class="tab active" data-tab="daily" onclick="switchTab('daily', this)">Daily</div>
+    <div class="tab" data-tab="weekly" onclick="switchTab('weekly', this)">Weekly</div>
+    <div class="tab" data-tab="monthly" onclick="switchTab('monthly', this)">Monthly</div>
+    <div class="tab" data-tab="lifetime" onclick="switchTab('lifetime', this)">Lifetime</div>
   </div>
 
-  <!-- Header Row -->
   <div class="header-row" id="headerRow">
     <div class="header-position">#</div>
     <div class="header-name">Player Name</div>
     <div class="header-winning">Winning</div>
   </div>
 
-  <!-- Player List -->
   <div class="player-list" id="playerList">
-    <!-- Players will be loaded here from Firebase -->
+    <div class="loading-state">
+      <div class="loading-icon"></div>
+      <div>Loading Leaderboard...</div>
+    </div>
   </div>
 
-  <!-- Bottom Navigation -->
   <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='tournaments.html'">
       <span class="nav-icon">🎮</span>
@@ -267,42 +261,167 @@
   </div>
 
   <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
+      authDomain: "prime-arena-a302b.firebaseapp.com",
+      projectId: "prime-arena-a302b",
+      storageBucket: "prime-arena-a302b.firebasestorage.app",
+      messagingSenderId: "118236794000",
+      appId: "1:118236794000:web:cd0e5bf7503b72f1cf5c15",
+      measurementEId: "G-EQJP1D9C92"
+    };
+
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+
     var currentTab = 'daily';
-    
-    function switchTab(tab, el) {
+    var cacheData = {};
+
+    function getStartDate(tab) {
+      var now = new Date();
+      if (tab === 'daily') {
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      } else if (tab === 'weekly') {
+        var d = new Date(now);
+        d.setDate(d.getDate() - 6);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+      } else if (tab === 'monthly') {
+        var d2 = new Date(now);
+        d2.setDate(d2.getDate() - 29);
+        d2.setHours(0, 0, 0, 0);
+        return d2.getTime();
+      } else {
+        return 0;
+      }
+    }
+
+    function formatNumber(n) {
+      return n.toString();
+    }
+
+    window.switchTab = function(tab, el) {
       currentTab = tab;
-      
-      document.querySelectorAll('.tab').forEach(function(t) {
-        t.classList.remove('active');
-      });
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
       el.classList.add('active');
-      
       loadLeaderboard();
-    }
-    
+    };
+
     function loadLeaderboard() {
-      // For now, show empty state
-      // Later, we will fetch real data from Firebase
-      
       var playerList = document.getElementById('playerList');
-      var headerRow = document.getElementById('headerRow');
-      
-      // Show header
-      headerRow.style.display = 'flex';
-      
-      // Empty state
-      playerList.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🏆</div>
-          <div class="empty-text">No Players Yet</div>
-          <div class="empty-subtext">Be the first to win!</div>
-        </div>
-      `;
+      playerList.innerHTML = '<div class="loading-state"><div class="loading-icon"></div><div>Loading Leaderboard...</div></div>';
+
+      if (cacheData[currentTab]) {
+        renderLeaderboard(cacheData[currentTab]);
+      }
+
+      var startTime = getStartDate(currentTab);
+
+      db.collection("transactions")
+        .where("type", "==", "match_win")
+        .get()
+        .then(function(snapshot) {
+          var userStats = {};
+
+          snapshot.forEach(function(doc) {
+            var data = doc.data();
+
+            var timestamp = data.timestamp || data.createdAt;
+            if (!timestamp) return;
+
+            var t = new Date(timestamp).getTime();
+            if (isNaN(t)) return;
+
+            if (startTime > 0 && t < startTime) return;
+
+            var uid = data.userId;
+            if (!uid) return;
+
+            if (!userStats[uid]) {
+              userStats[uid] = {
+                userId: uid,
+                name: data.userName || '',
+                winning: 0
+              };
+            }
+
+            userStats[uid].winning += (parseInt(data.amount) || 0);
+
+            if (!userStats[uid].name && data.userName) {
+              userStats[uid].name = data.userName;
+            }
+          });
+
+          var arr = Object.values(userStats);
+          arr.sort(function(a, b) { return b.winning - a.winning; });
+          arr = arr.slice(0, 50);
+
+          var missingNames = arr.filter(function(u) { return !u.name; }).map(function(u) { return u.userId; });
+
+          if (missingNames.length === 0) {
+            cacheData[currentTab] = arr;
+            renderLeaderboard(arr);
+            return;
+          }
+
+          Promise.all(missingNames.map(function(uid) {
+            return db.collection("users").doc(uid).get().then(function(d) {
+              return { uid: uid, name: d.exists ? (d.data().name || 'Unknown') : 'Unknown' };
+            }).catch(function() {
+              return { uid: uid, name: 'Unknown' };
+            });
+          })).then(function(results) {
+            var nameMap = {};
+            results.forEach(function(r) { nameMap[r.uid] = r.name; });
+            arr.forEach(function(u) {
+              if (!u.name || u.name === '') u.name = nameMap[u.userId] || 'Unknown';
+            });
+            cacheData[currentTab] = arr;
+            renderLeaderboard(arr);
+          });
+
+        })
+        .catch(function(error) {
+          console.error("Error loading leaderboard:", error);
+          playerList.innerHTML = '<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-text">Error: ' + error.message + '</div><div class="empty-subtext">Please check your internet connection</div></div>';
+        });
     }
-    
-    // Load on page start
+
+    function renderLeaderboard(players) {
+      var playerList = document.getElementById('playerList');
+
+      if (!players || players.length === 0) {
+        playerList.innerHTML = '<div class="empty-state"><div class="empty-icon">🏆</div><div class="empty-text">No Players Yet</div><div class="empty-subtext">Be the first to win!</div></div>';
+        return;
+      }
+
+      var html = '';
+      players.forEach(function(p, i) {
+        var pos = i + 1;
+        var rowClass = '';
+        var posDisplay = pos;
+
+        if (pos === 1) { rowClass = 'top-1'; posDisplay = '👑'; }
+        else if (pos === 2) { rowClass = 'top-2'; posDisplay = '🥈'; }
+        else if (pos === 3) { rowClass = 'top-3'; posDisplay = '🥉'; }
+
+        var crownClass = pos <= 3 ? ' crown' : '';
+
+        var name = (p.name || 'Unknown').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        html += '<div class="player-row ' + rowClass + '">' +
+          '<div class="player-position' + crownClass + '">' + posDisplay + '</div>' +
+          '<div class="player-name">' + name + '</div>' +
+          '<div class="player-winning">🪙 ' + formatNumber(p.winning) + '</div>' +
+        '</div>';
+      });
+
+      playerList.innerHTML = html;
+    }
+
     loadLeaderboard();
   </script>
+  
   <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+  </html>
