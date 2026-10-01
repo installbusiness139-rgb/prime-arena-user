@@ -36,7 +36,7 @@
     .step-num { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #ff6b00, #ffa500); color: white; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; flex-shrink: 0; }
     .step-text { font-size: 13px; color: #ccc; line-height: 1.5; padding-top: 5px; }
     .step-text strong { color: white; }
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #00c853; color: white; padding: 12px 25px; border-radius: 25px; font-size: 13px; font-weight: bold; display: none; z-index: 2000; }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #00c853; color: white; padding: 12px 25px; border-radius: 25px; font-size: 13px; font-weight: bold; display: none; z-index: 2000; max-width: 90%; text-align: center; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #666; font-size: 11px; padding: 5px 10px; }
     .nav-item.active { color: #ffa500; }
@@ -56,11 +56,11 @@
   </div>
 
   <div class="container">
-    <div class="info-box">
+    <div class="info-box" id="infoBox">
       Share your Referral Code with friends.<br>
-      When your friend joins their <strong>First Paid Match</strong> (min entry 10):<br>
-      🤑 You get <strong>3 Coins</strong><br>
-      🎁 Your friend gets <strong>2 Coins</strong><br>
+      When your friend joins their <strong>First Paid Match</strong>:<br>
+      🤑 You get <strong id="youGet">3 Coins</strong><br>
+      🎁 Your friend gets <strong id="friendGets">2 Coins</strong><br>
       <span style="font-size:11px;color:#888;">(Bonus coins are added to Bonus Wallet)</span>
     </div>
 
@@ -72,15 +72,15 @@
 
     <div class="share-title">SHARE YOUR REFERRAL CODE VIA</div>
     <div class="share-buttons">
-      <button class="share-btn whatsapp" onclick="shareNative()">
+      <button class="share-btn whatsapp" onclick="shareVia('whatsapp')">
         <span class="icon">💬</span>
         <span>WhatsApp</span>
       </button>
-      <button class="share-btn telegram" onclick="shareNative()">
+      <button class="share-btn telegram" onclick="shareVia('telegram')">
         <span class="icon">✈️</span>
         <span>Telegram</span>
       </button>
-      <button class="share-btn facebook" onclick="shareNative()">
+      <button class="share-btn facebook" onclick="shareVia('facebook')">
         <span class="icon">📘</span>
         <span>Facebook</span>
       </button>
@@ -101,12 +101,12 @@
       
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-text">Your friend joins their <strong>First Paid Match</strong> (min entry 10 coins).</div>
+        <div class="step-text">Your friend joins their <strong>First Paid Match</strong>.</div>
       </div>
       
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-text">You get <strong>3 Coins</strong> and your friend gets <strong>2 Coins</strong> in Bonus Wallet!</div>
+        <div class="step-text">You get <strong id="step4You">3 Coins</strong> and your friend gets <strong id="step4Friend">2 Coins</strong> in Bonus Wallet!</div>
       </div>
     </div>
   </div>
@@ -137,6 +137,7 @@
   </div>
 
   <script>
+    // ============ FIREBASE CONFIG ============
     var firebaseConfig = {
       apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
       authDomain: "prime-arena-a302b.firebaseapp.com",
@@ -147,82 +148,152 @@
       measurementId: "G-EQJP1D9C92"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
 
-    var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+    // ============ APP LINK (यहाँ अपना सही link डालो) ============
+    var APP_LINK = "https://installbusiness139-rgb.github.io/prime-arena-user/";
+
+    // ============ DEFAULTS ============
+    var referralBonus = 3;         // referrer को मिले (default)
+    var referralFriendBonus = 2;   // नए user को मिले (default)
+
+    // ============ USER ============
+    var user = {};
+    try { user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}'); } catch(e) { user = {}; }
+    if (!user.id) { window.location.href = 'login.html'; }
+
     var myReferralCode = '';
 
-    if (!user.id) {
-      window.location.href = 'login.html';
+    // ============ SHOW TOAST ============
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(function() { toast.style.display = 'none'; }, 2500);
     }
 
+    // ============ LOAD ADMIN SETTINGS (Bonus amounts) ============
+    function loadBonusSettings() {
+      db.collection("settings").doc("app").get().then(function(doc) {
+        if (doc.exists) {
+          var data = doc.data();
+          
+          // Referral bonus for referrer
+          if (data.referralBonus !== undefined && data.referralBonus !== '' && data.referralBonus !== null) {
+            referralBonus = parseInt(data.referralBonus) || 3;
+          }
+          
+          // Friend bonus (अगर admin ने set किया है)
+          if (data.referralFriendBonus !== undefined && data.referralFriendBonus !== '' && data.referralFriendBonus !== null) {
+            referralFriendBonus = parseInt(data.referralFriendBonus) || 2;
+          }
+          
+          // Update UI
+          document.getElementById('youGet').textContent = referralBonus + ' Coins';
+          document.getElementById('friendGets').textContent = referralFriendBonus + ' Coins';
+          document.getElementById('step4You').textContent = referralBonus + ' Coins';
+          document.getElementById('step4Friend').textContent = referralFriendBonus + ' Coins';
+        }
+      }).catch(function(error) {
+        console.warn("Settings load failed, using defaults:", error.message);
+      });
+    }
+
+    // ============ LOAD REFERRAL CODE ============
     function loadReferralCode() {
       db.collection("users").doc(user.id).get().then(function(doc) {
         if (doc.exists) {
           var data = doc.data();
           myReferralCode = data.referralCode || '';
-          
+
+          // अगर code नहीं है तो नया generate करो
           if (!myReferralCode) {
             myReferralCode = 'CXA' + Math.floor(1000 + Math.random() * 9000);
             db.collection("users").doc(user.id).update({
               referralCode: myReferralCode
             });
           }
-          
+
           document.getElementById('referralCode').textContent = myReferralCode;
+        } else {
+          document.getElementById('referralCode').textContent = 'ERROR';
         }
       }).catch(function(error) {
         console.error("Error:", error);
+        document.getElementById('referralCode').textContent = 'ERROR';
       });
     }
 
+    // ============ COPY CODE ============
     function copyCode() {
-      if (!myReferralCode) return;
-      navigator.clipboard.writeText(myReferralCode).then(function() {
-        showToast('✅ Referral Code Copied!');
-      }).catch(function() {
-        showToast('Referral Code: ' + myReferralCode);
-      });
-    }
+      if (!myReferralCode) {
+        showToast('Referral code loading...');
+        return;
+      }
 
-    function getShareMessage() {
-      return '🎮 Join Prime Arena and get 2 Bonus Coins!\n\nUse my Referral Code: ' + myReferralCode + '\n\n💰 Play tournaments, win coins, and withdraw money!';
-    }
-
-    function shareNative() {
-      var msg = getShareMessage();
-      var appLink = 'https://clutch-x-arena.ai.studio';
-      
-      if (navigator.share) {
-        navigator.share({
-          title: 'Prime Arena - Free Fire Tournament App',
-          text: msg,
-          url: appLink
-        }).catch(function(error) {
-          console.log('Share cancelled');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(myReferralCode).then(function() {
+          showToast('✅ Referral Code Copied!');
+        }).catch(function() {
+          fallbackCopy(myReferralCode);
+          showToast('✅ Referral Code Copied!');
         });
       } else {
-        // Fallback: Copy to clipboard
-        navigator.clipboard.writeText(msg + '\n\n' + appLink).then(function() {
-          showToast('✅ Copied! Paste in WhatsApp/Telegram');
-        }).catch(function() {
-          showToast('Referral Code: ' + myReferralCode);
-        });
+        fallbackCopy(myReferralCode);
+        showToast('✅ Referral Code Copied!');
       }
     }
 
-    function showToast(msg) {
-      var toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(function() {
-        toast.style.display = 'none';
-      }, 2500);
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
     }
 
+    // ============ SHARE MESSAGE ============
+    function getShareMessage() {
+      return '🎮 Join Prime Arena - India\'s Ultimate Free Fire Arena!\n\n' +
+             'Use my Referral Code: ' + myReferralCode + '\n\n' +
+             '🎁 Get ' + referralFriendBonus + ' Bonus Coins on registration!\n' +
+             '💰 Play tournaments, win coins, and withdraw real money!\n\n' +
+             'Download/Open: ' + APP_LINK;
+    }
+
+    // ============ SHARE VIA (Specific App) ============
+    function shareVia(platform) {
+      if (!myReferralCode) {
+        showToast('Please wait, code loading...');
+        return;
+      }
+
+      var msg = getShareMessage();
+      var encodedMsg = encodeURIComponent(msg);
+      var url = '';
+
+      if (platform === 'whatsapp') {
+        url = 'https://wa.me/?text=' + encodedMsg;
+      } else if (platform === 'telegram') {
+        url = 'https://t.me/share/url?url=' + encodeURIComponent(APP_LINK) + '&text=' + encodeURIComponent(msg);
+      } else if (platform === 'facebook') {
+        url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(APP_LINK) + '&quote=' + encodedMsg;
+      }
+
+      if (url) {
+        window.open(url, '_blank');
+      }
+    }
+
+    // ============ INIT ============
+    loadBonusSettings();
     loadReferralCode();
   </script>
+  
   <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+        </html>
