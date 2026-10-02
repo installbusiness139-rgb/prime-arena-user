@@ -10,7 +10,7 @@
 body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:80px;min-height:100vh}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#0d1230;position:sticky;top:0;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:10px}
-.logo-small{width:35px;height:35px;border-radius:50%;border:2px solid #ffa500}
+.logo-small{width:40px;height:40px;border-radius:50%;border:2px solid #ffa500;object-fit:cover;background:#1a1f3a}
 .welcome-text{font-size:11px;color:#ccc}
 .username{font-size:14px;color:#ffa500;font-weight:bold}
 .topbar-right{display:flex;align-items:center;gap:10px}
@@ -66,7 +66,7 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 <body>
 <div class="topbar">
 <div class="topbar-left">
-<img src="images/logo.png" class="logo-small" alt="Logo" onerror="this.style.display='none'">
+<img src="images/logo.png" class="logo-small" id="homeProfilePic" alt="Logo" onerror="this.src='images/logo.png'">
 <div>
 <div class="welcome-text">Welcome Back,</div>
 <div class="username" id="userName">PLAYER</div>
@@ -180,20 +180,38 @@ if(!user.id){location.href='login.html';}
 
 if(user.name){document.getElementById('userName').textContent=user.name;}
 
+// ============ PROFILE PIC LOAD (localStorage se turant) ============
+if(user.profilePic){
+  var hp=document.getElementById('homeProfilePic');
+  if(hp)hp.src=user.profilePic;
+}
+
 var firstLoadDone=false;
 
-// ============ LOAD BALANCE ============
-async function loadUserBalance(){
+// ============ LOAD BALANCE + PROFILE PIC ============
+function loadUserBalance(){
 var balanceEl=document.getElementById('coinBalance');
-try{
-const userDocRef=doc(db,"users",user.id);
-const userDocSnap=await getDoc(userDocRef);
-if(userDocSnap.exists()){
-var data=userDocSnap.data();
+db.collection('users').doc(user.id).get().then(function(doc){
+if(doc.exists){
+var data=doc.data();
 var balance=data.balance||0;
 balanceEl.textContent=balance;
 balanceEl.classList.remove('loading');
 user.balance=balance;
+
+// Update name too
+if(data.name){
+  user.name=data.name;
+  document.getElementById('userName').textContent=data.name;
+}
+
+// Profile pic update
+if(data.profilePic){
+  user.profilePic=data.profilePic;
+  var hpEl=document.getElementById('homeProfilePic');
+  if(hpEl)hpEl.src=data.profilePic;
+}
+
 try{localStorage.setItem('primeArenaUser',JSON.stringify(user));}catch(e){}
 firstLoadDone=true;
 }else{
@@ -201,29 +219,27 @@ balanceEl.textContent='0';
 balanceEl.classList.remove('loading');
 firstLoadDone=true;
 }
-}catch(error){
+}).catch(function(error){
 console.error("Error loading balance:",error);
 if(!firstLoadDone){
 balanceEl.textContent='0';
 balanceEl.classList.remove('loading');
 firstLoadDone=true;
 }
-}
+});
 }
 
-// ============ LOAD MY CONTESTS (REAL COUNTS) ============
-async function loadMyContests(){
+// ============ LOAD MY CONTESTS ============
+function loadMyContests(){
 var ongoingEl=document.getElementById('ongoingCount');
 var upcomingEl=document.getElementById('upcomingCount');
 var completedEl=document.getElementById('completedCount');
 
-try{
-// Get all user's match_entry transactions
-var txSnap=await db.collection('transactions')
+db.collection('transactions')
 .where('userId','==',user.id)
 .where('type','==','match_entry')
-.get();
-
+.get()
+.then(function(txSnap){
 if(txSnap.empty){
 ongoingEl.textContent='0';ongoingEl.classList.remove('loading');
 upcomingEl.textContent='0';upcomingEl.classList.remove('loading');
@@ -231,16 +247,13 @@ completedEl.textContent='0';completedEl.classList.remove('loading');
 return;
 }
 
-// Get unique matchIds
 var matchIds=[];
 txSnap.forEach(function(doc){
 var mid=doc.data().matchId;
 if(mid&&matchIds.indexOf(mid)===-1)matchIds.push(mid);
 });
 
-// Fetch all matches in parallel
 var ongoing=0,upcoming=0,completed=0;
-
 var promises=matchIds.map(function(mid){
 return db.collection('matches').doc(mid).get().then(function(mSnap){
 if(!mSnap.exists)return;
@@ -251,56 +264,56 @@ else upcoming++;
 }).catch(function(){});
 });
 
-await Promise.all(promises);
-
+Promise.all(promises).then(function(){
 ongoingEl.textContent=ongoing;ongoingEl.classList.remove('loading');
 upcomingEl.textContent=upcoming;upcomingEl.classList.remove('loading');
 completedEl.textContent=completed;completedEl.classList.remove('loading');
-
-}catch(e){
+});
+}).catch(function(e){
 console.error('Contests load error:',e);
 ongoingEl.textContent='0';ongoingEl.classList.remove('loading');
 upcomingEl.textContent='0';upcomingEl.classList.remove('loading');
 completedEl.textContent='0';completedEl.classList.remove('loading');
-}
+});
 }
 
-// ============ REAL-TIME BAN CHECK ============
-const userRef=doc(db,"users",user.id);
-onSnapshot(userRef,function(snapshot){
-if(snapshot.exists()){
+// ============ REAL-TIME BAN CHECK + PROFILE PIC UPDATE ============
+db.collection('users').doc(user.id).onSnapshot(function(snapshot){
+if(snapshot.exists){
 var data=snapshot.data();
+
+// Ban check
 if(data.isBlocked===true){
 document.getElementById('banOverlay').classList.add('show');
+}
+
+// Profile pic update (agar kisi aur device se change hui ho)
+if(data.profilePic){
+  var hpEl=document.getElementById('homeProfilePic');
+  if(hpEl&&hpEl.src!==data.profilePic)hpEl.src=data.profilePic;
+  user.profilePic=data.profilePic;
+  try{localStorage.setItem('primeArenaUser',JSON.stringify(user));}catch(e){}
+}
+
+// Name update
+if(data.name&&data.name!==user.name){
+  user.name=data.name;
+  document.getElementById('userName').textContent=data.name;
 }
 }
 });
 
 // ============ UNREAD NOTIFICATIONS BADGE ============
-async function updateNotifBadge(){
-try{
+function updateNotifBadge(){
 var lastRead=localStorage.getItem('lastNotifRead_'+user.id);
 var lastReadTime=lastRead?new Date(lastRead).getTime():0;
 
-var wSnap=await getDocs(query(collection(db,"withdrawals"),where("userId","==",user.id)));
-var rSnap=await getDocs(query(collection(db,"redeem_requests"),where("userId","==",user.id)));
-
 var unreadCount=0;
+var doneCount=0;
+var totalToCheck=2;
 
-wSnap.forEach(function(d){
-var data=d.data();
-var t=data.paidAt||data.rejectedAt||data.createdAt;
-if(!t)return;
-if(new Date(t).getTime()>lastReadTime)unreadCount++;
-});
-
-rSnap.forEach(function(d){
-var data=d.data();
-var t=data.completedAt||data.rejectedAt||data.createdAt;
-if(!t)return;
-if(new Date(t).getTime()>lastReadTime)unreadCount++;
-});
-
+function finish(){
+if(doneCount>=totalToCheck){
 var badge=document.getElementById('notifBadge');
 if(badge){
 if(unreadCount>0){
@@ -310,9 +323,28 @@ badge.style.display='block';
 badge.style.display='none';
 }
 }
-}catch(e){
-console.warn('Notif badge error:',e);
 }
+}
+
+db.collection('withdrawals').where('userId','==',user.id).get().then(function(snap){
+snap.forEach(function(d){
+var data=d.data();
+var t=data.paidAt||data.rejectedAt||data.createdAt;
+if(!t)return;
+if(new Date(t).getTime()>lastReadTime)unreadCount++;
+});
+doneCount++;finish();
+}).catch(function(){doneCount++;finish();});
+
+db.collection('redeem_requests').where('userId','==',user.id).get().then(function(snap){
+snap.forEach(function(d){
+var data=d.data();
+var t=data.completedAt||data.rejectedAt||data.createdAt;
+if(!t)return;
+if(new Date(t).getTime()>lastReadTime)unreadCount++;
+});
+doneCount++;finish();
+}).catch(function(){doneCount++;finish();});
 }
 
 // ============ HOW TO USE POPUP ============
