@@ -15,7 +15,6 @@
     .profile-pic { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #ffa500; margin: 0 auto 15px; background: #1a1f3a; display: flex; justify-content: center; align-items: center; font-size: 50px; overflow: hidden; }
     .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
     .profile-name { font-size: 20px; font-weight: bold; color: white; margin-bottom: 5px; }
-    .kyc-badge { display: inline-block; color: #00c853; font-size: 13px; font-weight: bold; }
     .stats-box { margin: 0 15px 20px; background: #1a1f3a; border-radius: 15px; padding: 20px; display: flex; justify-content: space-around; border: 1px solid #2a2f4a; }
     .stat-item { text-align: center; flex: 1; }
     .stat-value { font-size: 22px; font-weight: bold; color: #ffa500; margin-bottom: 5px; }
@@ -37,6 +36,17 @@
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #666; font-size: 11px; padding: 5px 10px; }
     .nav-item.active { color: #ffa500; }
     .nav-icon { font-size: 22px; }
+
+    .popup-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px); }
+    .popup-overlay.show { display: flex; }
+    .popup-box { background: #0f121d; border: 1px solid #ffa500; border-radius: 14px; padding: 25px 20px; width: 100%; max-width: 350px; text-align: center; }
+    .popup-icon { font-size: 45px; margin-bottom: 12px; line-height: 1; }
+    .popup-title { color: #fca311; font-size: 19px; font-weight: bold; margin-bottom: 10px; }
+    .popup-msg { color: #ccc; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+    .popup-buttons { display: flex; gap: 10px; }
+    .popup-btn { flex: 1; padding: 13px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+    .popup-btn-cancel { background: #2a2d3e; color: #fff; }
+    .popup-btn-danger { background: linear-gradient(135deg,#ff3131,#ff5252); color: #fff; }
   </style>
 </head>
 <body>
@@ -50,7 +60,6 @@
       <img src="images/logo.png" alt="Profile" onerror="this.style.display='none'">
     </div>
     <div class="profile-name" id="profileName">Loading...</div>
-    <div class="kyc-badge">✅ KYC Verified</div>
   </div>
 
   <div class="stats-box">
@@ -205,6 +214,15 @@
     </div>
   </div>
 
+  <div class="popup-overlay" id="customPopup">
+    <div class="popup-box">
+      <div class="popup-icon" id="popupIcon">⚠️</div>
+      <div class="popup-title" id="popupTitle">Confirm</div>
+      <div class="popup-msg" id="popupMsg">Message</div>
+      <div class="popup-buttons" id="popupButtons"></div>
+    </div>
+  </div>
+
   <script>
     var firebaseConfig = {
       apiKey: "AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",
@@ -216,93 +234,103 @@
       measurementId: "G-EQJP1D9C92"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
 
-    var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
+    var user = {};
+    try { user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}'); } catch(e) { user = {}; }
+    if (!user.id) { window.location.href = 'login.html'; }
 
-    if (!user.id) {
-      window.location.href = 'login.html';
+    // ============ POPUP HELPERS ============
+    function showConfirm(icon, title, msg, btnLabel, btnClass, callback) {
+      document.getElementById('popupIcon').textContent = icon;
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupMsg').textContent = msg;
+      var btnRow = document.getElementById('popupButtons');
+      btnRow.innerHTML = '';
+      var cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'CANCEL';
+      cancelBtn.className = 'popup-btn popup-btn-cancel';
+      cancelBtn.onclick = function() { document.getElementById('customPopup').classList.remove('show'); };
+      var confirmBtn = document.createElement('button');
+      confirmBtn.textContent = btnLabel;
+      confirmBtn.className = 'popup-btn ' + (btnClass || 'popup-btn-danger');
+      confirmBtn.onclick = function() { document.getElementById('customPopup').classList.remove('show'); if (callback) callback(); };
+      btnRow.appendChild(cancelBtn);
+      btnRow.appendChild(confirmBtn);
+      document.getElementById('customPopup').classList.add('show');
     }
 
+    // ============ LOAD PROFILE ============
     function loadProfile() {
+      if (user.name) {
+        document.getElementById('profileName').textContent = user.name;
+      }
+
       db.collection("users").doc(user.id).get().then(function(doc) {
         if (doc.exists) {
           var data = doc.data();
-          
-          document.getElementById('profileName').textContent = 'Username: ' + (data.name || 'Unknown');
+          document.getElementById('profileName').textContent = data.name || 'Unknown';
           document.getElementById('matchesPlayed').textContent = data.matchesPlayed || 0;
           document.getElementById('totalKills').textContent = data.totalKills || 0;
           document.getElementById('playCoinWon').textContent = data.winning || 0;
+
+          user.name = data.name || user.name;
+          try { localStorage.setItem('primeArenaUser', JSON.stringify(user)); } catch(e) {}
         }
       }).catch(function(error) {
         console.error("Error:", error);
       });
     }
 
+    // ============ TOGGLE SWITCH (with save) ============
     function toggleSwitch(id) {
-      document.getElementById(id).classList.toggle('on');
+      var el = document.getElementById(id);
+      el.classList.toggle('on');
+      var state = el.classList.contains('on') ? 'on' : 'off';
+      try { localStorage.setItem('toggle_' + id, state); } catch(e) {}
     }
 
+    function loadToggleStates() {
+      ['noticeToggle', 'musicToggle'].forEach(function(id) {
+        try {
+          var saved = localStorage.getItem('toggle_' + id);
+          if (saved) {
+            var el = document.getElementById(id);
+            if (saved === 'on') el.classList.add('on');
+            else el.classList.remove('on');
+          }
+        } catch(e) {}
+      });
+    }
+
+    // ============ LOGOUT ============
     function logout() {
-  showCustomPopup(
-    'Logout',
-    'Are you sure you want to logout?',
-    function() {
-      localStorage.removeItem('primeArenaUser');
-      localStorage.removeItem('selectedMatchId');
-      window.location.href = 'login.html';
-    },
-    true
-  );
-}
-
-function showCustomPopup(title, message, onConfirm, showCancel) {
-  var popup = document.createElement('div');
-  popup.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:9999;padding:20px;';
-  var box = document.createElement('div');
-  box.style.cssText = 'background:#1a1f3a;border-radius:15px;padding:25px;width:100%;max-width:350px;border:1px solid #ffa500;';
-  var titleEl = document.createElement('div');
-  titleEl.style.cssText = 'font-size:18px;font-weight:bold;color:#ffa500;margin-bottom:12px;text-align:center;';
-  titleEl.textContent = title;
-  var msgEl = document.createElement('div');
-  msgEl.style.cssText = 'font-size:14px;color:#ccc;line-height:1.5;margin-bottom:20px;text-align:center;';
-  msgEl.textContent = message;
-  var btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:10px;';
-  if (showCancel) {
-    var cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'CANCEL';
-    cancelBtn.style.cssText = 'flex:1;padding:14px;background:#2a2f4a;border:none;border-radius:10px;color:white;font-size:14px;font-weight:bold;cursor:pointer;';
-    cancelBtn.onclick = function() { document.body.removeChild(popup); };
-    var confirmBtn = document.createElement('button');
-    confirmBtn.textContent = 'CONFIRM';
-    confirmBtn.style.cssText = 'flex:1;padding:14px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:white;font-size:14px;font-weight:bold;cursor:pointer;';
-    confirmBtn.onclick = function() {
-      document.body.removeChild(popup);
-      if (onConfirm) onConfirm();
-    };
-    btnRow.appendChild(cancelBtn);
-    btnRow.appendChild(confirmBtn);
-  } else {
-    var okBtn = document.createElement('button');
-    okBtn.textContent = 'OK';
-    okBtn.style.cssText = 'flex:1;padding:14px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:white;font-size:14px;font-weight:bold;cursor:pointer;';
-    okBtn.onclick = function() {
-      document.body.removeChild(popup);
-      if (onConfirm) onConfirm();
-    };
-    btnRow.appendChild(okBtn);
-  }
-  box.appendChild(titleEl);
-  box.appendChild(msgEl);
-  box.appendChild(btnRow);
-  popup.appendChild(box);
-  document.body.appendChild(popup);
+      showConfirm(
+        '🚪',
+        'Logout?',
+        'Are you sure you want to logout?',
+        'LOGOUT',
+        'popup-btn-danger',
+        function() {
+          try {
+            localStorage.removeItem('primeArenaUser');
+            localStorage.removeItem('selectedMatchId');
+          } catch(e) {}
+          window.location.href = 'login.html';
+        }
+      );
     }
 
+    document.getElementById('customPopup').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('show');
+    });
+
+    // ============ INIT ============
     loadProfile();
+    loadToggleStates();
   </script>
+  
   <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+      </html>
