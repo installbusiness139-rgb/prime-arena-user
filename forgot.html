@@ -1,223 +1,165 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Forgot Password - Prime Arena</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      background: #0a0e27;
-      color: white;
-      font-family: 'Arial', sans-serif;
-      padding: 30px 20px;
-      min-height: 100vh;
-    }
-    
-    .header {
-      margin-bottom: 40px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 28px;
-      color: white;
-      font-weight: bold;
-      line-height: 1.3;
-    }
-    
-    .header h1 span {
-      color: #ffa500;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #ccc;
-      font-size: 14px;
-    }
-    
-    .form-group input {
-      width: 100%;
-      padding: 15px;
-      background: #1a1f3a;
-      border: 1px solid #2a2f4a;
-      border-radius: 10px;
-      color: white;
-      font-size: 16px;
-      outline: none;
-    }
-    
-    .form-group input:focus {
-      border-color: #ffa500;
-    }
-    
-    .form-group input::placeholder {
-      color: #666;
-    }
-    
-    .login-link-top {
-      text-align: right;
-      margin-bottom: 20px;
-    }
-    
-    .login-link-top a {
-      color: #ffa500;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    
-    .forgot-btn {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #ff6b00, #ffa500);
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 25px;
-      letter-spacing: 1px;
-    }
-    
-    .forgot-btn:hover {
-      opacity: 0.9;
-    }
-    
-    .forgot-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .signup-link {
-      text-align: center;
-      color: #ccc;
-      font-size: 15px;
-    }
-    
-    .signup-link a {
-      color: #ffa500;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    
-    .error-msg {
-      color: #ff3131;
-      font-size: 13px;
-      margin-top: 5px;
-      display: none;
-    }
-    
-    .success-msg {
-      color: #00c853;
-      font-size: 14px;
-      text-align: center;
-      margin-bottom: 15px;
-      display: none;
-      padding: 15px;
-      background: rgba(0, 200, 83, 0.1);
-      border-radius: 10px;
-      border: 1px solid #00c853;
-    }
-    
-    .loading {
-      display: none;
-      text-align: center;
-      color: #ffa500;
-      margin-bottom: 15px;
-    }
-  </style>
+<title>Forgot Password - Prime Arena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding:30px 20px;min-height:100vh}
+.back-btn{font-size:24px;color:white;cursor:pointer;display:inline-block;margin-bottom:20px}
+.header{margin-bottom:40px;text-align:center}
+.header h1{font-size:28px;font-weight:bold;line-height:1.3}
+.header h1 span{color:#ffa500}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;margin-bottom:8px;color:#ccc;font-size:14px}
+.form-group input{width:100%;padding:15px;background:#1a1f3a;border:1px solid #2a2f4a;border-radius:10px;color:white;font-size:16px;outline:none}
+.form-group input:focus{border-color:#ffa500}
+.form-group input::placeholder{color:#666}
+.login-link-top{text-align:right;margin-bottom:20px}
+.login-link-top a{color:#ffa500;text-decoration:none;font-size:14px}
+.forgot-btn{width:100%;padding:16px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:white;font-size:16px;font-weight:bold;cursor:pointer;margin-bottom:25px;letter-spacing:1px}
+.forgot-btn:disabled{opacity:.6;cursor:not-allowed}
+.signup-link{text-align:center;color:#ccc;font-size:15px}
+.signup-link a{color:#ffa500;text-decoration:none;font-weight:bold}
+.error-msg{color:#ff3131;font-size:13px;margin-top:5px;display:none}
+.loading{display:none;text-align:center;color:#ffa500;margin-bottom:15px;font-size:14px}
+.info-box{background:rgba(255,165,0,.1);border:1px solid #ffa500;border-radius:10px;padding:12px;margin-bottom:20px;font-size:12px;color:#ffa500;line-height:1.6}
+.popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:9999;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(3px)}
+.popup-overlay.show{display:flex}
+.popup-box{background:#0f121d;border:1px solid #ffa500;border-radius:15px;padding:28px 22px;width:100%;max-width:360px;text-align:center}
+.popup-icon{font-size:50px;margin-bottom:12px;line-height:1}
+.popup-title{color:#fca311;font-size:20px;font-weight:bold;margin-bottom:12px}
+.popup-msg{color:#ccc;font-size:14px;line-height:1.6;margin-bottom:22px}
+.popup-btn{width:100%;padding:14px;background:linear-gradient(135deg,#00c853,#00e676);border:none;border-radius:10px;color:white;font-size:14px;font-weight:bold;cursor:pointer;text-transform:uppercase}
+</style>
 </head>
 <body>
-  <div class="header">
-    <h1>Forget Your<br><span>Password</span></h1>
-  </div>
 
-  <div class="success-msg" id="successMsg">Password reset link sent to your email!</div>
-  <div class="loading" id="loadingMsg">Sending reset link, please wait...</div>
+<div class="back-btn" onclick="window.location.href='login.html'">←</div>
 
-  <form id="forgotForm">
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="Enter your registered email">
-      <div class="error-msg" id="emailError">Please enter a valid email</div>
-    </div>
+<div class="header">
+<h1>Forget Your<br><span>Password</span></h1>
+</div>
 
-    <div class="login-link-top">
-      <a href="login.html">Login</a>
-    </div>
+<div class="info-box">
+💡 Admin आपका password reset करेगा। नीचे अपनी registered email डालें।
+</div>
 
-    <button type="submit" class="forgot-btn" id="forgotBtn">FORGET PASSWORD</button>
-  </form>
+<div class="loading" id="loadingMsg">⏳ Sending request...</div>
 
-  <div class="signup-link">
-    Don't have an account? <a href="register.html">Sign Up</a>
-  </div>
+<form id="forgotForm">
+<div class="form-group">
+<label>Registered Email</label>
+<input type="email" id="email" placeholder="Enter your registered email">
+<div class="error-msg" id="emailError">Please enter a valid email</div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-    
-    const firebaseConfig = {
-      apiKey: "AIzaSyC22o0eveUN3GL9WNtJSzdKghN-X672mU",
-      authDomain: "prime-arena-a302b.firebaseapp.com",
-      projectId: "prime-arena-a302b",
-      storageBucket: "prime-arena-a302b.firebasestorage.app",
-      messagingSenderId: "118236794800",
-      appId: "1:118236794800:web:cd9e5bf7503b72f1cf5c15",
-      measurementId: "G-EQJP1D9C92"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    
-    document.getElementById('forgotForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      var email = document.getElementById('email').value.trim();
-      
-      if (!email || !email.includes('@')) {
-        document.getElementById('emailError').style.display = 'block';
-        return;
-      } else {
-        document.getElementById('emailError').style.display = 'none';
-      }
-      
-      document.getElementById('loadingMsg').style.display = 'block';
-      document.getElementById('forgotBtn').disabled = true;
-      
-      try {
-        // Check if email exists in database
-        const emailQuery = query(collection(db, "users"), where("email", "==", email));
-        const emailSnapshot = await getDocs(emailQuery);
-        
-        if (emailSnapshot.empty) {
-          alert('This email is not registered with us. Please check and try again.');
-          document.getElementById('loadingMsg').style.display = 'none';
-          document.getElementById('forgotBtn').disabled = false;
-          return;
-        }
-        
-        // Show success message (In real app, you would send an email here)
-        document.getElementById('loadingMsg').style.display = 'none';
-        document.getElementById('successMsg').style.display = 'block';
-        
-        setTimeout(function() {
-          window.location.href = 'login.html';
-        }, 3000);
-        
-      } catch (error) {
-        console.error("Error: ", error);
-        alert('Something went wrong. Please try again.');
-        document.getElementById('loadingMsg').style.display = 'none';
-        document.getElementById('forgotBtn').disabled = false;
-      }
-    });
-  </script>
+<div class="login-link-top">
+<a href="login.html">Login</a>
+</div>
+
+<button type="submit" class="forgot-btn" id="forgotBtn">SEND RESET REQUEST</button>
+</form>
+
+<div class="signup-link">
+Don't have an account? <a href="register.html">Sign Up</a>
+</div>
+
+<div class="popup-overlay" id="customPopup">
+<div class="popup-box">
+<div class="popup-icon" id="popupIcon">✅</div>
+<div class="popup-title" id="popupTitle">Success</div>
+<div class="popup-msg" id="popupMsg">Message</div>
+<button class="popup-btn" onclick="closePopup()">OK</button>
+</div>
+</div>
+
+<script>
+var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
+if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+var db=firebase.firestore();
+
+function showPopup(icon,title,msg){
+document.getElementById('popupIcon').textContent=icon;
+document.getElementById('popupTitle').textContent=title;
+document.getElementById('popupMsg').textContent=msg;
+document.getElementById('customPopup').classList.add('show');
+}
+function closePopup(){
+document.getElementById('customPopup').classList.remove('show');
+}
+
+document.getElementById('forgotForm').addEventListener('submit',async function(e){
+e.preventDefault();
+
+var email=document.getElementById('email').value.trim().toLowerCase();
+
+if(!email||!email.includes('@')){
+document.getElementById('emailError').style.display='block';
+return;
+}
+document.getElementById('emailError').style.display='none';
+
+document.getElementById('loadingMsg').style.display='block';
+document.getElementById('forgotBtn').disabled=true;
+
+try{
+// Check if email exists
+var snap=await db.collection('users').where('email','==',email).get();
+
+if(snap.empty){
+document.getElementById('loadingMsg').style.display='none';
+document.getElementById('forgotBtn').disabled=false;
+showPopup('❌','Email Not Found','This email is not registered with us. Please check and try again.');
+return;
+}
+
+// Check for existing pending request
+var pendingSnap=await db.collection('password_reset_requests')
+.where('email','==',email)
+.where('status','==','pending')
+.get();
+
+if(!pendingSnap.empty){
+document.getElementById('loadingMsg').style.display='none';
+document.getElementById('forgotBtn').disabled=false;
+showPopup('⏳','Request Already Sent','You already have a pending request. Please wait for admin to reset it.');
+return;
+}
+
+var userDoc=snap.docs[0];
+var userData=userDoc.data();
+
+// Create reset request
+await db.collection('password_reset_requests').add({
+userId:userDoc.id,
+userName:userData.name||'Unknown',
+email:email,
+phone:userData.phone||'',
+status:'pending',
+requestedAt:new Date().toISOString(),
+createdAt:new Date().toISOString()
+});
+
+document.getElementById('loadingMsg').style.display='none';
+document.getElementById('forgotBtn').disabled=false;
+document.getElementById('email').value='';
+showPopup('✅','Request Sent!','Your password reset request has been sent to admin. You will be contacted soon on your registered email or phone.');
+
+}catch(error){
+console.error('Error:',error);
+document.getElementById('loadingMsg').style.display='none';
+document.getElementById('forgotBtn').disabled=false;
+showPopup('❌','Error','Something went wrong. Please try again.');
+}
+});
+
+document.getElementById('customPopup').addEventListener('click',function(e){
+if(e.target===this)closePopup();
+});
+</script>
 </body>
 </html>
