@@ -15,7 +15,6 @@
     .profile-pic-box { text-align: center; padding: 20px 0; }
     .profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #ffa500; margin: 0 auto; background: #1a1f3a; display: flex; justify-content: center; align-items: center; font-size: 50px; overflow: hidden; }
     .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
-    .change-pic-btn { margin-top: 10px; background: #1a1f3a; border: 1px solid #ffa500; color: #ffa500; padding: 8px 20px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
     .form-card { background: #1a1f3a; border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid #2a2f4a; }
     .form-card-title { font-size: 14px; color: #ffa500; font-weight: bold; margin-bottom: 15px; letter-spacing: 0.5px; }
     .form-group { margin-bottom: 15px; }
@@ -25,11 +24,20 @@
     .form-group input:disabled { opacity: 0.6; cursor: not-allowed; }
     .save-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #00c853, #00e676); border: none; border-radius: 12px; color: white; font-size: 15px; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
     .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #00c853; color: white; padding: 12px 25px; border-radius: 25px; font-size: 13px; font-weight: bold; display: none; z-index: 2000; }
     .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0d1230; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #2a2f4a; z-index: 100; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; color: #666; font-size: 11px; padding: 5px 10px; }
     .nav-item.active { color: #ffa500; }
     .nav-icon { font-size: 22px; }
+
+    .popup-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(3px); }
+    .popup-overlay.show { display: flex; }
+    .popup-box { background: #0f121d; border: 1px solid #ffa500; border-radius: 14px; padding: 25px 20px; width: 100%; max-width: 350px; text-align: center; }
+    .popup-icon { font-size: 45px; margin-bottom: 12px; line-height: 1; }
+    .popup-title { color: #fca311; font-size: 19px; font-weight: bold; margin-bottom: 10px; }
+    .popup-msg { color: #ccc; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+    .popup-btn { width: 100%; padding: 13px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+    .popup-btn-confirm { background: linear-gradient(135deg,#00c853,#00e676); color: #fff; }
+    .popup-btn-danger { background: linear-gradient(135deg,#ff3131,#ff5252); color: #fff; }
   </style>
 </head>
 <body>
@@ -86,7 +94,14 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">Success!</div>
+  <div class="popup-overlay" id="customPopup">
+    <div class="popup-box">
+      <div class="popup-icon" id="popupIcon">⚠️</div>
+      <div class="popup-title" id="popupTitle">Notice</div>
+      <div class="popup-msg" id="popupMsg">Message</div>
+      <button class="popup-btn popup-btn-confirm" id="popupBtn" onclick="closePopup()">OK</button>
+    </div>
+  </div>
 
   <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='tournaments.html'">
@@ -122,7 +137,7 @@
       measurementId: "G-EQJP1D9C92"
     };
 
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
 
     var user = JSON.parse(localStorage.getItem('primeArenaUser') || '{}');
@@ -131,12 +146,33 @@
       window.location.href = 'login.html';
     }
 
+    // ============ POPUP HELPERS ============
+    function showPopup(icon, title, msg, type) {
+      document.getElementById('popupIcon').textContent = icon;
+      document.getElementById('popupTitle').textContent = title;
+      document.getElementById('popupMsg').textContent = msg;
+      var btn = document.getElementById('popupBtn');
+      btn.className = 'popup-btn';
+      if (type === 'error') btn.classList.add('popup-btn-danger');
+      else btn.classList.add('popup-btn-confirm');
+      document.getElementById('customPopup').classList.add('show');
+    }
+
+    function closePopup() {
+      document.getElementById('customPopup').classList.remove('show');
+    }
+
+    document.getElementById('customPopup').addEventListener('click', function(e) {
+      if (e.target === this) closePopup();
+    });
+
+    // ============ LOAD PROFILE ============
     function loadProfile() {
       db.collection("users").doc(user.id).get().then(function(doc) {
         if (doc.exists) {
           var data = doc.data();
           document.getElementById('username').value = data.name || '';
-          document.getElementById('fullName').value = (data.firstName || '') + ' ' + (data.lastName || '');
+          document.getElementById('fullName').value = ((data.firstName || '') + ' ' + (data.lastName || '')).trim();
           document.getElementById('email').value = data.email || '';
           document.getElementById('mobile').value = data.phone || '';
           document.getElementById('ffIgn').value = data.ffIgn || '';
@@ -144,9 +180,11 @@
         }
       }).catch(function(error) {
         console.error("Error:", error);
+        showPopup('❌', 'Error', 'Could not load profile. Please try again.', 'error');
       });
     }
 
+    // ============ SAVE PROFILE ============
     function saveProfile() {
       var ffIgn = document.getElementById('ffIgn').value.trim();
       var ffUid = document.getElementById('ffUid').value.trim();
@@ -158,27 +196,21 @@
         ffIgn: ffIgn,
         ffUid: ffUid
       }).then(function() {
-        showToast('✅ Profile saved successfully!');
+        showPopup('✅', 'Success!', 'Profile saved successfully!', 'success');
         document.getElementById('saveBtn').disabled = false;
         document.getElementById('saveBtn').textContent = '💾 SAVE CHANGES';
       }).catch(function(error) {
-        alert('Error: ' + error.message);
+        console.error("Error:", error);
+        showPopup('❌', 'Error', 'Could not save: ' + error.message, 'error');
         document.getElementById('saveBtn').disabled = false;
         document.getElementById('saveBtn').textContent = '💾 SAVE CHANGES';
       });
     }
 
-    function showToast(msg) {
-      var toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(function() {
-        toast.style.display = 'none';
-      }, 2500);
-    }
-
+    // ============ INIT ============
     loadProfile();
   </script>
+  
   <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+        </html>
