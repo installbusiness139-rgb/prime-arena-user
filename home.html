@@ -10,7 +10,7 @@
 body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:80px;min-height:100vh}
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#0d1230;position:sticky;top:0;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:10px}
-.logo-small{width:40px;height:40px;border-radius:50%;border:2px solid #ffa500;object-fit:cover;background:#1a1f3a}
+.logo-small{width:40px;height:40px;border-radius:50%;border:2px solid #ffa500}
 .welcome-text{font-size:11px;color:#ccc}
 .username{font-size:14px;color:#ffa500;font-weight:bold}
 .topbar-right{display:flex;align-items:center;gap:10px}
@@ -19,10 +19,22 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .coin-icon{color:#ffa500;font-size:16px}
 .coin-count{font-size:14px;font-weight:bold;color:#ffa500}
 .coin-count.loading{color:#888;font-size:12px}
-.notification-bell{position:relative;font-size:22px;cursor:pointer;padding:5px;transition:.2s}
-.notification-bell:active{transform:scale(.9)}
+.notification-bell{position:relative;font-size:22px;cursor:pointer;padding:5px}
 .notification-badge{position:absolute;top:-3px;right:-3px;background:#ff3131;color:white;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold;min-width:16px;text-align:center;display:none}
-.quick-icons{display:flex;justify-content:space-around;padding:15px 10px;gap:8px}
+
+.banner-section{margin:15px;position:relative}
+.banner-carousel{position:relative;width:100%;aspect-ratio:16/8;border-radius:15px;overflow:hidden;background:#1a1f3a;border:2px solid #ffa500;box-shadow:0 5px 20px rgba(255,165,0,.2)}
+.banner-track{display:flex;width:100%;height:100%;transition:transform .4s ease-out;touch-action:pan-y}
+.banner-slide{flex:0 0 100%;width:100%;height:100%;position:relative;overflow:hidden;cursor:pointer}
+.banner-slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.banner-placeholder{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px;text-align:center;background:linear-gradient(135deg,#1a1f3a,#2a1f4a);gap:8px}
+.banner-placeholder-icon{font-size:45px}
+.banner-placeholder-sub{font-size:11px;color:#888}
+.banner-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;min-height:10px}
+.banner-dot{width:8px;height:8px;border-radius:50%;background:#2a2f4a;transition:.3s;cursor:pointer}
+.banner-dot.active{background:#ffa500;width:22px;border-radius:4px}
+
+.quick-icons{display:flex;justify-content:space-around;padding:0 10px 15px;gap:8px}
 .quick-icon{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
 .quick-icon-img{width:45px;height:45px;background:#1a1f3a;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:20px;border:2px solid #ffa500}
 .quick-icon-label{font-size:10px;color:#ccc;text-align:center}
@@ -38,20 +50,48 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .contest-label{font-size:11px;color:#ccc;margin-bottom:3px}
 .contest-count{font-size:18px;font-weight:bold;color:#ffa500}
 .contest-count.loading{color:#666;font-size:14px}
+
+.matches-section{padding:0 15px}
+.match-item{background:#1a1f3a;border-radius:12px;overflow:hidden;margin-bottom:15px;border:1px solid #2a2f4a;cursor:pointer;transition:.2s}
+.match-item:active{transform:scale(.98);background:#2a2f4a}
+.match-banner{width:100%;aspect-ratio:16/9;background:#0d1230;position:relative;overflow:hidden}
+.match-banner img{width:100%;height:100%;object-fit:cover;display:block}
+.match-banner-placeholder{width:100%;height:100%;display:flex;justify-content:center;align-items:center;font-size:60px;background:linear-gradient(135deg,#1a1f3a,#2a1f4a)}
+.match-slots{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.75);color:#fff;font-size:11px;padding:5px 10px;border-radius:15px;font-weight:bold;display:flex;align-items:center;gap:6px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.1)}
+.match-slots-dot{width:8px;height:8px;border-radius:50%;background:#00c853;box-shadow:0 0 8px #00c853}
+.match-slots-dot.full{background:#ff3131;box-shadow:0 0 8px #ff3131}
+.match-status-badge{position:absolute;top:10px;left:10px;font-size:10px;padding:4px 10px;border-radius:10px;font-weight:bold;text-transform:uppercase;letter-spacing:.5px}
+.match-status-badge.live{background:#ff3131;color:#fff;animation:pulse 1.5s infinite}
+.match-status-badge.upcoming{background:#00c853;color:#fff}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.match-info{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.match-info-left{flex:1;min-width:0}
+.match-title{font-size:14px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.match-meta{font-size:10px;color:#888;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.match-mode{background:#0a0e27;color:#ffa500;font-size:10px;padding:3px 8px;border-radius:5px;font-weight:bold;border:1px solid #2a2f4a}
+.match-entry{background:linear-gradient(135deg,#00c853,#00e676);color:#fff;font-size:11px;padding:7px 12px;border-radius:8px;font-weight:bold;white-space:nowrap;text-align:center}
+.match-entry .lbl{font-size:8px;opacity:.85;display:block;letter-spacing:.5px}
+.match-entry .amt{font-size:13px}
+.no-matches{text-align:center;padding:50px 20px;color:#666}
+.no-matches .ic{font-size:55px;opacity:.5;margin-bottom:12px}
+.no-matches .t1{font-size:14px;margin-bottom:5px;color:#aaa}
+.no-matches .t2{font-size:11px;color:#555}
+.matches-loading{text-align:center;padding:40px 20px;color:#ffa500;font-size:13px}
+
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a2f4a;z-index:100}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#666;font-size:11px;padding:5px 10px}
 .nav-item.active{color:#ffa500}
 .nav-icon{font-size:22px}
 .support-btn{position:fixed;bottom:90px;right:20px;width:55px;height:55px;background:#ff3131;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:26px;cursor:pointer;box-shadow:0 5px 15px rgba(255,49,49,.4);z-index:99}
-.ban-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:99999;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(5px)}
+.ban-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:99999;justify-content:center;align-items:center;padding:20px}
 .ban-overlay.show{display:flex}
-.ban-box{background:#0f121d;border:1px solid #ff3131;border-radius:18px;padding:30px 22px;width:100%;max-width:360px;text-align:center;box-shadow:0 10px 40px rgba(255,49,49,.3)}
-.ban-icon{width:80px;height:80px;background:linear-gradient(135deg,#ff3131,#ff5252);border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:40px;margin:0 auto 20px;box-shadow:0 0 30px rgba(255,49,49,.5)}
-.ban-title{font-size:22px;font-weight:bold;color:#ff3131;margin-bottom:12px;letter-spacing:1px}
+.ban-box{background:#0f121d;border:1px solid #ff3131;border-radius:18px;padding:30px 22px;width:100%;max-width:360px;text-align:center}
+.ban-icon{width:80px;height:80px;background:linear-gradient(135deg,#ff3131,#ff5252);border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:40px;margin:0 auto 20px}
+.ban-title{font-size:22px;font-weight:bold;color:#ff3131;margin-bottom:12px}
 .ban-msg{font-size:14px;color:#ccc;line-height:1.6;margin-bottom:25px}
 .ban-msg b{color:#ffa500}
-.ban-btn{width:100%;padding:15px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer;letter-spacing:1px}
-.popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:99999;justify-content:center;align-items:center;padding:20px;backdrop-filter:blur(3px)}
+.ban-btn{width:100%;padding:15px;background:linear-gradient(135deg,#ff6b00,#ffa500);border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:bold;cursor:pointer}
+.popup-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:99999;justify-content:center;align-items:center;padding:20px}
 .popup-overlay.show{display:flex}
 .popup-box{background:#0f121d;border:1px solid #ffa500;border-radius:15px;padding:25px 22px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto}
 .popup-title{color:#fca311;font-size:19px;font-weight:bold;margin-bottom:15px;text-align:center}
@@ -66,7 +106,7 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 <body>
 <div class="topbar">
 <div class="topbar-left">
-<img src="images/logo.png" class="logo-small" id="homeProfilePic" alt="Logo" onerror="this.src='images/logo.png'">
+<img src="images/logo.png" class="logo-small" alt="Logo" onerror="this.style.display='none'">
 <div>
 <div class="welcome-text">Welcome Back,</div>
 <div class="username" id="userName">PLAYER</div>
@@ -82,6 +122,20 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 <span class="notification-badge" id="notifBadge">0</span>
 </div>
 </div>
+</div>
+
+<div class="banner-section" id="bannerSection">
+<div class="banner-carousel" id="bannerCarousel">
+<div class="banner-track" id="bannerTrack">
+<div class="banner-slide">
+<div class="banner-placeholder">
+<div class="banner-placeholder-icon">🎮</div>
+<div class="banner-placeholder-sub">Loading...</div>
+</div>
+</div>
+</div>
+</div>
+<div class="banner-dots" id="bannerDots"></div>
 </div>
 
 <div class="quick-icons">
@@ -131,6 +185,17 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 </div>
 </div>
 
+<div class="section-title">
+<h2>AVAILABLE MATCHES</h2>
+<span>Join & Win</span>
+</div>
+
+<div class="matches-section">
+<div id="matchesList">
+<div class="matches-loading">⏳ Loading matches...</div>
+</div>
+</div>
+
 <div class="support-btn" onclick="location.href='contact.html'">🎧</div>
 
 <div class="bottom-nav">
@@ -157,18 +222,17 @@ Please contact support for more information.
 <div class="popup-box">
 <div class="popup-title">❓ How to Use Prime Arena</div>
 <div class="popup-content">
-<div class="step"><div class="step-num">1</div><div class="step-text"><b>Wallet में coins add करो</b><br>Wallet → Add Coins → UPI से payment करो → UTR डालो</div></div>
-<div class="step"><div class="step-num">2</div><div class="step-text"><b>Tournament join करो</b><br>Tournaments → Match select करो → Slot book करो</div></div>
-<div class="step"><div class="step-num">3</div><div class="step-text"><b>Match time पर Room ID/Password मिलेगा</b><br>Match details में room ID + password दिख जाएगा</div></div>
-<div class="step"><div class="step-num">4</div><div class="step-text"><b>Free Fire Custom Room join करो</b><br>Room ID + Password paste करके room में आओ</div></div>
-<div class="step"><div class="step-num">5</div><div class="step-text"><b>जीतो और पैसे कमाओ</b><br>जीतने पर Winning Balance में coins आएँगे → Withdraw कर सकते हो</div></div>
-<div style="text-align:center;margin-top:15px;padding:10px;background:rgba(255,165,0,.1);border-radius:8px;font-size:12px;color:#ffa500">💡 Tips: Refer & Earn से bonus कमाओ! Daily tournaments खेलो, prizes जीतो!</div>
+<div class="step"><div class="step-num">1</div><div class="step-text"><b>Wallet me coins add karo</b><br>Wallet → Add Coins → UPI se payment karo → UTR daalo</div></div>
+<div class="step"><div class="step-num">2</div><div class="step-text"><b>Tournament join karo</b><br>Tournaments → Match select karo → Slot book karo</div></div>
+<div class="step"><div class="step-num">3</div><div class="step-text"><b>Match time par Room ID/Password milega</b><br>Match details me room ID + password dikh jayega</div></div>
+<div class="step"><div class="step-num">4</div><div class="step-text"><b>Free Fire Custom Room join karo</b><br>Room ID + Password paste karke room me aao</div></div>
+<div class="step"><div class="step-num">5</div><div class="step-text"><b>Jeeto aur paise kamao</b><br>Jeetne par Winning Balance me coins aayenge → Withdraw kar sakte ho</div></div>
+<div style="text-align:center;margin-top:15px;padding:10px;background:rgba(255,165,0,.1);border-radius:8px;font-size:12px;color:#ffa500">💡 Tips: Refer & Earn se bonus kamao! Daily tournaments khelo, prizes jeeto!</div>
 </div>
 <button class="popup-btn" onclick="closeHowToUse()">GOT IT</button>
 </div>
-</div>
-
-<script>
+  </div>
+  <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -180,15 +244,236 @@ if(!user.id){location.href='login.html';}
 
 if(user.name){document.getElementById('userName').textContent=user.name;}
 
-// ============ PROFILE PIC LOAD (localStorage se turant) ============
-if(user.profilePic){
-  var hp=document.getElementById('homeProfilePic');
-  if(hp)hp.src=user.profilePic;
-}
-
 var firstLoadDone=false;
 
-// ============ LOAD BALANCE + PROFILE PIC ============
+function esc(s){
+if(s===undefined||s===null)return '';
+return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============ BANNER CAROUSEL ============
+var currentSlide=0;
+var totalSlides=0;
+var autoSlideInterval=null;
+var banners=[];
+
+function loadBanners(){
+db.collection('settings').doc('banners').get().then(function(doc){
+if(doc.exists&&doc.data().list&&Array.isArray(doc.data().list)&&doc.data().list.length>0){
+banners=doc.data().list.filter(function(b){return b.image&&b.image.trim();});
+}else{
+banners=[];
+}
+renderBanners();
+}).catch(function(e){
+banners=[];
+renderBanners();
+});
+}
+
+function renderBanners(){
+var track=document.getElementById('bannerTrack');
+var dots=document.getElementById('bannerDots');
+var section=document.getElementById('bannerSection');
+
+if(banners.length===0){
+section.style.display='none';
+return;
+}
+section.style.display='block';
+
+track.innerHTML='';
+dots.innerHTML='';
+totalSlides=banners.length;
+
+banners.forEach(function(b,i){
+var slide=document.createElement('div');
+slide.className='banner-slide';
+slide.setAttribute('data-index',i);
+slide.onclick=function(e){
+e.preventDefault();
+if(isDragging)return;
+if(b.link&&b.link.trim()){
+window.location.href=b.link.trim();
+}
+};
+
+var inner='<img src="'+b.image.replace(/"/g,'&quot;')+'" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div class=&quot;banner-placeholder&quot;><div class=&quot;banner-placeholder-icon&quot;>🖼️</div><div class=&quot;banner-placeholder-sub&quot;>Image load nahi hui</div></div>\'">';
+slide.innerHTML=inner;
+track.appendChild(slide);
+
+var dot=document.createElement('div');
+dot.className='banner-dot'+(i===0?' active':'');
+dot.onclick=function(e){e.stopPropagation();goToSlide(i);};
+dots.appendChild(dot);
+});
+
+currentSlide=0;
+updateBannerPosition();
+startAutoSlide();
+initSwipe();
+}
+
+function updateBannerPosition(){
+var track=document.getElementById('bannerTrack');
+track.style.transform='translateX(-'+(currentSlide*100)+'%)';
+document.querySelectorAll('.banner-dot').forEach(function(d,i){
+if(i===currentSlide)d.classList.add('active');
+else d.classList.remove('active');
+});
+}
+
+function goToSlide(i){
+if(i<0)i=totalSlides-1;
+if(i>=totalSlides)i=0;
+currentSlide=i;
+updateBannerPosition();
+restartAutoSlide();
+}
+
+function nextSlide(){
+currentSlide++;
+if(currentSlide>=totalSlides)currentSlide=0;
+updateBannerPosition();
+}
+
+function startAutoSlide(){
+stopAutoSlide();
+if(totalSlides<=1)return;
+autoSlideInterval=setInterval(nextSlide,3500);
+}
+function stopAutoSlide(){
+if(autoSlideInterval){clearInterval(autoSlideInterval);autoSlideInterval=null;}
+}
+function restartAutoSlide(){stopAutoSlide();startAutoSlide();}
+
+var touchStartX=0;
+var touchEndX=0;
+var isDragging=false;
+
+function initSwipe(){
+var carousel=document.getElementById('bannerCarousel');
+if(!carousel)return;
+
+carousel.addEventListener('touchstart',function(e){
+touchStartX=e.changedTouches[0].screenX;
+isDragging=false;
+stopAutoSlide();
+},{passive:true});
+
+carousel.addEventListener('touchmove',function(e){
+touchEndX=e.changedTouches[0].screenX;
+if(Math.abs(touchEndX-touchStartX)>10)isDragging=true;
+},{passive:true});
+
+carousel.addEventListener('touchend',function(e){
+var diff=touchEndX-touchStartX;
+if(Math.abs(diff)>50){
+if(diff<0){currentSlide++;if(currentSlide>=totalSlides)currentSlide=totalSlides-1;}
+else{currentSlide--;if(currentSlide<0)currentSlide=0;}
+updateBannerPosition();
+}
+setTimeout(function(){isDragging=false;},150);
+startAutoSlide();
+},{passive:true});
+}
+
+// ============ AVAILABLE MATCHES ============
+function loadAvailableMatches(){
+var list=document.getElementById('matchesList');
+
+db.collection('matches').get().then(function(snap){
+var matches=[];
+snap.forEach(function(doc){
+var d=doc.data();
+d.id=doc.id;
+var st=(d.status||'upcoming').toLowerCase();
+if(st==='upcoming'||st==='live')matches.push(d);
+});
+
+matches.sort(function(a,b){
+var sa=(a.status||'').toLowerCase();
+var sb=(b.status||'').toLowerCase();
+if(sa==='live'&&sb!=='live')return -1;
+if(sa!=='live'&&sb==='live')return 1;
+return new Date(b.createdAt||0)-new Date(a.createdAt||0);
+});
+
+if(matches.length===0){
+list.innerHTML='<div class="no-matches">'+
+'<div class="ic">🎮</div>'+
+'<div class="t1">No Matches Available</div>'+
+'<div class="t2">Check back later for new tournaments!</div>'+
+'</div>';
+return;
+}
+
+var html='';
+matches.forEach(function(m){
+var total=parseInt(m.totalSlots)||0;
+if(!total){
+if(m.mode==='Solo')total=48;
+else if(m.mode==='Duo')total=24;
+else if(m.mode==='Squad')total=12;
+else total=48;
+}
+var booked=parseInt(m.joinedPlayers)||0;
+var isFull=booked>=total;
+var slotsDotClass=isFull?'full':'';
+
+var banner='';
+if(m.bannerUrl&&m.bannerUrl.trim()){
+banner='<img src="'+m.bannerUrl.replace(/"/g,'&quot;')+'" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'<div class=&quot;match-banner-placeholder&quot;>🎮</div>\'">';
+}else{
+banner='<div class="match-banner-placeholder">🎮</div>';
+}
+
+var statusBadge='';
+var st=(m.status||'upcoming').toLowerCase();
+if(st==='live'){
+statusBadge='<div class="match-status-badge live">🔴 LIVE</div>';
+}else{
+statusBadge='<div class="match-status-badge upcoming">UPCOMING</div>';
+}
+
+html+='<div class="match-item" onclick="openMatch(\''+m.id+'\')">'+
+'<div class="match-banner">'+
+banner+
+statusBadge+
+'<div class="match-slots">'+
+'<span class="match-slots-dot '+slotsDotClass+'"></span>'+
+'<span>'+booked+' / '+total+'</span>'+
+'</div>'+
+'</div>'+
+'<div class="match-info">'+
+'<div class="match-info-left">'+
+'<div class="match-title">'+esc(m.title||'Match')+'</div>'+
+'<div class="match-meta">'+
+'<span class="match-mode">'+esc(m.mode||'Solo')+'</span>'+
+'<span>'+esc(m.map||'Bermuda')+'</span>'+
+'</div>'+
+'</div>'+
+'<div class="match-entry">'+
+'<span class="lbl">ENTRY</span>'+
+'<span class="amt">₹'+esc(m.entryFee||0)+'</span>'+
+'</div>'+
+'</div>'+
+'</div>';
+});
+
+list.innerHTML=html;
+}).catch(function(e){
+console.error('Matches load error:',e);
+list.innerHTML='<div class="no-matches"><div class="ic">❌</div><div class="t1">Could not load matches</div><div class="t2">Please check your internet</div></div>';
+});
+}
+
+function openMatch(id){
+try{localStorage.setItem('selectedMatchId',id);}catch(e){}
+window.location.href='match-details.html?id='+encodeURIComponent(id);
+}
+
+// ============ LOAD BALANCE ============
 function loadUserBalance(){
 var balanceEl=document.getElementById('coinBalance');
 db.collection('users').doc(user.id).get().then(function(doc){
@@ -198,20 +483,10 @@ var balance=data.balance||0;
 balanceEl.textContent=balance;
 balanceEl.classList.remove('loading');
 user.balance=balance;
-
-// Update name too
 if(data.name){
-  user.name=data.name;
-  document.getElementById('userName').textContent=data.name;
+user.name=data.name;
+document.getElementById('userName').textContent=data.name;
 }
-
-// Profile pic update
-if(data.profilePic){
-  user.profilePic=data.profilePic;
-  var hpEl=document.getElementById('homeProfilePic');
-  if(hpEl)hpEl.src=data.profilePic;
-}
-
 try{localStorage.setItem('primeArenaUser',JSON.stringify(user));}catch(e){}
 firstLoadDone=true;
 }else{
@@ -220,7 +495,6 @@ balanceEl.classList.remove('loading');
 firstLoadDone=true;
 }
 }).catch(function(error){
-console.error("Error loading balance:",error);
 if(!firstLoadDone){
 balanceEl.textContent='0';
 balanceEl.classList.remove('loading');
@@ -270,44 +544,30 @@ upcomingEl.textContent=upcoming;upcomingEl.classList.remove('loading');
 completedEl.textContent=completed;completedEl.classList.remove('loading');
 });
 }).catch(function(e){
-console.error('Contests load error:',e);
 ongoingEl.textContent='0';ongoingEl.classList.remove('loading');
 upcomingEl.textContent='0';upcomingEl.classList.remove('loading');
 completedEl.textContent='0';completedEl.classList.remove('loading');
 });
 }
 
-// ============ REAL-TIME BAN CHECK + PROFILE PIC UPDATE ============
+// ============ REAL-TIME BAN CHECK ============
 db.collection('users').doc(user.id).onSnapshot(function(snapshot){
 if(snapshot.exists){
 var data=snapshot.data();
-
-// Ban check
 if(data.isBlocked===true){
 document.getElementById('banOverlay').classList.add('show');
 }
-
-// Profile pic update (agar kisi aur device se change hui ho)
-if(data.profilePic){
-  var hpEl=document.getElementById('homeProfilePic');
-  if(hpEl&&hpEl.src!==data.profilePic)hpEl.src=data.profilePic;
-  user.profilePic=data.profilePic;
-  try{localStorage.setItem('primeArenaUser',JSON.stringify(user));}catch(e){}
-}
-
-// Name update
 if(data.name&&data.name!==user.name){
-  user.name=data.name;
-  document.getElementById('userName').textContent=data.name;
+user.name=data.name;
+document.getElementById('userName').textContent=data.name;
 }
 }
 });
 
-// ============ UNREAD NOTIFICATIONS BADGE ============
+// ============ NOTIF BADGE ============
 function updateNotifBadge(){
 var lastRead=localStorage.getItem('lastNotifRead_'+user.id);
 var lastReadTime=lastRead?new Date(lastRead).getTime():0;
-
 var unreadCount=0;
 var doneCount=0;
 var totalToCheck=2;
@@ -347,7 +607,7 @@ doneCount++;finish();
 }).catch(function(){doneCount++;finish();});
 }
 
-// ============ HOW TO USE POPUP ============
+// ============ HOW TO USE ============
 function openHowToUse(){
 document.getElementById('howToPopup').classList.add('show');
 }
@@ -358,7 +618,6 @@ document.getElementById('howToPopup').addEventListener('click',function(e){
 if(e.target===this)closeHowToUse();
 });
 
-// ============ LOGOUT ON BAN ============
 function closeAndLogout(){
 try{
 localStorage.removeItem('primeArenaUser');
@@ -370,9 +629,16 @@ window.location.replace('login.html');
 // ============ INIT ============
 loadUserBalance();
 loadMyContests();
+loadBanners();
+loadAvailableMatches();
 updateNotifBadge();
 setInterval(updateNotifBadge,30000);
 setInterval(loadUserBalance,5000);
+
+document.addEventListener('visibilitychange',function(){
+if(document.hidden){stopAutoSlide();}
+else{startAutoSlide();}
+});
 </script>
 </body>
   </html>
