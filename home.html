@@ -21,7 +21,6 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .coin-count.loading{color:#888;font-size:12px}
 .notification-bell{position:relative;font-size:22px;cursor:pointer;padding:5px}
 .notification-badge{position:absolute;top:-3px;right:-3px;background:#ff3131;color:white;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold;min-width:16px;text-align:center;display:none}
-
 .banner-section{margin:15px;position:relative}
 .banner-carousel{position:relative;width:100%;aspect-ratio:16/9;border-radius:15px;overflow:hidden;background:#1a1f3a;border:2px solid #ffa500;box-shadow:0 5px 20px rgba(255,165,0,.2)}
 .banner-track{display:flex;width:100%;height:100%;transition:transform .4s ease-out;touch-action:pan-y}
@@ -33,7 +32,6 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .banner-dots{display:flex;justify-content:center;gap:6px;margin-top:10px;min-height:10px}
 .banner-dot{width:8px;height:8px;border-radius:50%;background:#2a2f4a;transition:.3s;cursor:pointer}
 .banner-dot.active{background:#ffa500;width:22px;border-radius:4px}
-
 .quick-icons{display:flex;justify-content:space-around;padding:0 10px 15px;gap:8px}
 .quick-icon{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
 .quick-icon-img{width:45px;height:45px;background:#1a1f3a;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:20px;border:2px solid #ffa500}
@@ -50,7 +48,6 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .contest-label{font-size:11px;color:#ccc;margin-bottom:3px}
 .contest-count{font-size:18px;font-weight:bold;color:#ffa500}
 .contest-count.loading{color:#666;font-size:14px}
-
 .matches-section{padding:0 15px}
 .match-item{background:#1a1f3a;border-radius:12px;overflow:hidden;margin-bottom:15px;border:1px solid #2a2f4a;cursor:pointer;transition:.2s}
 .match-item:active{transform:scale(.98);background:#2a2f4a}
@@ -69,6 +66,7 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .match-title{font-size:14px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
 .match-meta{font-size:10px;color:#888;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .match-mode{background:#0a0e27;color:#ffa500;font-size:10px;padding:3px 8px;border-radius:5px;font-weight:bold;border:1px solid #2a2f4a}
+.match-mode.team-mode{background:linear-gradient(135deg,#6a1b9a,#8e24aa);color:#fff;border-color:#6a1b9a}
 .match-entry{background:linear-gradient(135deg,#00c853,#00e676);color:#fff;font-size:11px;padding:7px 12px;border-radius:8px;font-weight:bold;white-space:nowrap;text-align:center}
 .match-entry .lbl{font-size:8px;opacity:.85;display:block;letter-spacing:.5px}
 .match-entry .amt{font-size:13px}
@@ -77,12 +75,11 @@ body{background:#0a0e27;color:white;font-family:Arial,sans-serif;padding-bottom:
 .no-matches .t1{font-size:14px;margin-bottom:5px;color:#aaa}
 .no-matches .t2{font-size:11px;color:#555}
 .matches-loading{text-align:center;padding:40px 20px;color:#ffa500;font-size:13px}
-
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#0d1230;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #2a2f4a;z-index:100}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;color:#666;font-size:11px;padding:5px 10px}
 .nav-item.active{color:#ffa500}
 .nav-icon{font-size:22px}
-.support-btn{position:fixed;bottom:90px;right:20px;width:55px;height:55px;background:#ff3131;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:26px;cursor:pointer;box-shadow:0 5px 15px rgba(255,49,49,.4);z-index:99}
+.support-btn{position:fixed;bottom:95px;right:15px;width:50px;height:50px;background:#ff3131;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:24px;cursor:pointer;box-shadow:0 5px 15px rgba(255,49,49,.4);z-index:99}
 .ban-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:99999;justify-content:center;align-items:center;padding:20px}
 .ban-overlay.show{display:flex}
 .ban-box{background:#0f121d;border:1px solid #ff3131;border-radius:18px;padding:30px 22px;width:100%;max-width:360px;text-align:center}
@@ -231,8 +228,9 @@ Please contact support for more information.
 </div>
 <button class="popup-btn" onclick="closeHowToUse()">GOT IT</button>
 </div>
-  </div>
-  <script>
+</div>
+
+<script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
 
 if(!firebase.apps||!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -249,6 +247,17 @@ var firstLoadDone=false;
 function esc(s){
 if(s===undefined||s===null)return '';
 return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function isTeamMode(mode){
+return mode==='Team Duo'||mode==='Team Squad'||mode==='Team 6';
+}
+
+function getTeamSize(mode){
+if(mode==='Team Duo')return 2;
+if(mode==='Team Squad')return 4;
+if(mode==='Team 6')return 6;
+return 0;
 }
 
 // ============ BANNER CAROUSEL ============
@@ -410,11 +419,18 @@ return;
 
 var html='';
 matches.forEach(function(m){
+var mode=m.mode||'Solo';
+var teamMatch=isTeamMode(mode);
+var teamSize=getTeamSize(mode);
+
 var total=parseInt(m.totalSlots)||0;
 if(!total){
-if(m.mode==='Solo')total=48;
-else if(m.mode==='Duo')total=24;
-else if(m.mode==='Squad')total=12;
+if(mode==='Solo')total=48;
+else if(mode==='Duo')total=24;
+else if(mode==='Squad')total=12;
+else if(mode==='Team Duo')total=4;
+else if(mode==='Team Squad')total=8;
+else if(mode==='Team 6')total=12;
 else total=48;
 }
 var booked=parseInt(m.joinedPlayers)||0;
@@ -436,6 +452,22 @@ statusBadge='<div class="match-status-badge live">🔴 LIVE</div>';
 statusBadge='<div class="match-status-badge upcoming">UPCOMING</div>';
 }
 
+// Mode display
+var modeDisplay=mode;
+var modeClass='match-mode';
+if(teamMatch){
+modeDisplay='Team '+teamSize+' VS '+teamSize;
+modeClass='match-mode team-mode';
+}
+
+// Second line for team matches
+var metaLine='';
+if(teamMatch){
+metaLine='<span class="'+modeClass+'">Team A VS Team B</span><span>'+esc(m.map||'Bermuda')+'</span>';
+}else{
+metaLine='<span class="'+modeClass+'">'+esc(mode)+'</span><span>'+esc(m.map||'Bermuda')+'</span>';
+}
+
 html+='<div class="match-item" onclick="openMatch(\''+m.id+'\')">'+
 '<div class="match-banner">'+
 banner+
@@ -448,10 +480,7 @@ statusBadge+
 '<div class="match-info">'+
 '<div class="match-info-left">'+
 '<div class="match-title">'+esc(m.title||'Match')+'</div>'+
-'<div class="match-meta">'+
-'<span class="match-mode">'+esc(m.mode||'Solo')+'</span>'+
-'<span>'+esc(m.map||'Bermuda')+'</span>'+
-'</div>'+
+'<div class="match-meta">'+metaLine+'</div>'+
 '</div>'+
 '<div class="match-entry">'+
 '<span class="lbl">ENTRY</span>'+
