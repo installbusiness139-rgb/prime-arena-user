@@ -57,6 +57,24 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-he
 .sbtn.booked{background:#2a2f4a;color:#ff3131;cursor:not-allowed;border:1px solid #ff3131}
 .sbtn.selected{background:#ffa500;color:#0a0e27;transform:scale(1.1);box-shadow:0 0 10px rgba(255,165,0,.6)}
 .sbtn.yours{background:#0088cc}
+
+/* ============ TEAM SLOTS ============ */
+.team-section{margin-bottom:18px}
+.team-header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px 10px 0 0;font-size:14px;font-weight:bold}
+.team-header.team-a{background:linear-gradient(135deg,#0088cc,#00aaff);color:#fff}
+.team-header.team-b{background:linear-gradient(135deg,#ff3131,#ff5252);color:#fff}
+.team-count{font-size:11px;background:rgba(255,255,255,.25);padding:3px 8px;border-radius:8px;font-weight:bold}
+.team-slots-wrap{background:#0a0e27;border:1px solid #2a2f4a;border-top:none;border-radius:0 0 10px 10px;padding:12px}
+.team-slots-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.team-slots-grid.squad-grid{grid-template-columns:repeat(4,1fr)}
+.team-slots-grid.six-grid{grid-template-columns:repeat(3,1fr)}
+.team-slot{aspect-ratio:1/1;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:4px;gap:2px}
+.team-slot .slot-num{font-size:15px;font-weight:bold}
+.team-slot .slot-label{font-size:8px;letter-spacing:.5px}
+.team-slot.booked{background:#2a2f4a;color:#ff3131;cursor:not-allowed;border:1px solid #ff3131}
+.team-slot.selected{background:#ffa500;color:#0a0e27;transform:scale(1.08);box-shadow:0 0 12px rgba(255,165,0,.7)}
+.team-slot.yours{background:#0088cc;color:#fff}
+
 .pf{background:#0a0e27;border:1px solid #ffa500;border-radius:10px;padding:14px;margin-bottom:12px;display:none}
 .pf.show{display:block}
 .pft{font-size:12px;color:#ffa500;font-weight:bold;margin-bottom:12px;text-align:center}
@@ -76,7 +94,7 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-he
 .err div{color:#ccc;font-size:12px;line-height:1.5}
 .err button{margin-top:12px;padding:10px 20px;background:#ff3131;color:#fff;border:none;border-radius:8px;font-weight:bold}
 .info-badge{background:rgba(255,165,0,.15);border:1px solid #ffa500;border-radius:8px;padding:10px 12px;font-size:11px;color:#ffa500;margin-bottom:12px;line-height:1.5}
-.upload-box{background:#0a0e27;border:2px dashed #2a2f4a;border-radius:10px;padding:18px;text-align:center;cursor:pointer;margin-bottom:10px;transition:.2s}
+.upload-box{background:#0a0e27;border:2px dashed #2a2f4a;border-radius:10px;padding:18px;text-align:center;cursor:pointer;margin-bottom:10px}
 .upload-box:active{border-color:#ffa500;background:#1a1f3a}
 .upload-box .uicon{font-size:32px;margin-bottom:6px}
 .upload-box .utext{font-size:12px;color:#ffa500;font-weight:bold}
@@ -86,7 +104,6 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-he
 .preview-box img{width:100%;max-height:200px;object-fit:contain;border-radius:6px}
 .preview-box .remove-img{position:absolute;top:5px;right:5px;background:#ff3131;color:#fff;border:none;border-radius:50%;width:28px;height:28px;font-size:16px;font-weight:bold;cursor:pointer;line-height:1}
 .optional-tag{font-size:9px;color:#666;font-weight:normal;margin-left:4px}
-.required-tag{font-size:9px;color:#ff3131;font-weight:normal;margin-left:4px}
 .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;flex-direction:column;z-index:99999}
 .loading-overlay.show{display:flex}
 .spinner{width:60px;height:60px;border:5px solid #1a1f3a;border-top-color:#ffa500;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
@@ -95,7 +112,7 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-he
 </style>
 </head>
 <body>
-<div class="tb">
+  <div class="tb">
 <div class="bk" onclick="location.href='tournaments.html'">←</div>
 <div class="tt">MATCH DETAILS</div>
 </div>
@@ -125,7 +142,36 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-he
 <span><span class="d r"></span> Booked</span>
 <span><span class="d b"></span> Yours</span>
 </div>
+
+<!-- ============ SOLO/DUO/SQUAD MODE (Normal) ============ -->
+<div id="normalSlotSection" style="display:none">
 <div class="sg" id="sg"></div>
+</div>
+
+<!-- ============ TEAM MODE (Team Duo / Squad / 6) ============ -->
+<div id="teamSlotSection" style="display:none">
+<div class="info-badge">⚔️ Team match hai! Apni team ka slot chuno. Team A aur Team B ke alag-alag slots hain.</div>
+
+<div class="team-section">
+<div class="team-header team-a">
+<span>🔵 TEAM A</span>
+<span class="team-count" id="teamACount">0 / 0</span>
+</div>
+<div class="team-slots-wrap">
+<div class="team-slots-grid" id="teamAGrid"></div>
+</div>
+</div>
+
+<div class="team-section">
+<div class="team-header team-b">
+<span>🔴 TEAM B</span>
+<span class="team-count" id="teamBCount">0 / 0</span>
+</div>
+<div class="team-slots-wrap">
+<div class="team-slots-grid" id="teamBGrid"></div>
+</div>
+</div>
+</div>
 
 <div class="pf" id="pf">
 <div class="pft">ENTER YOUR PLAYER DETAILS</div>
@@ -217,10 +263,15 @@ body{background:#0a0e27;color:#fff;font-family:Arial;padding-bottom:220px;min-he
 <div class="ni" onclick="location.href='home.html'"><span class="nicon">🏠</span><span>Home</span></div>
 <div class="ni" onclick="location.href='wallet.html'"><span class="nicon">💰</span><span>Wallet</span></div>
 <div class="ni" onclick="location.href='profile.html'"><span class="nicon">👤</span><span>Profile</span></div>
-</div><script>
+  </div>
+  <script>
 var firebaseConfig={apiKey:"AIzaSyC22oO0eveUN3GL9WNtJSzdKghN-X67ZmU",authDomain:"prime-arena-a302b.firebaseapp.com",projectId:"prime-arena-a302b",storageBucket:"prime-arena-a302b.firebasestorage.app",messagingSenderId:"118236794000",appId:"1:118236794000:web:cd0e5bf7503b72f1cf5c15",measurementId:"G-EQJP1D9C92"};
+
 var db,user,matchId,currentMatch,bookedSlots={},userSlot=null,selectedSlot=null,totalSlots=0;
 var reportImageData=null;
+var isTeamMatch=false;
+var teamSize=0;
+var selectedTeam=null;
 
 function showErr(m){
 document.getElementById('wrap').innerHTML='<div class="err"><b>Error</b><div>'+m+'</div><button onclick="location.reload()">Retry</button></div>';
@@ -262,7 +313,22 @@ if(m.totalSlots&&parseInt(m.totalSlots)>0)return parseInt(m.totalSlots);
 if(m.mode==='Solo')return 48;
 if(m.mode==='Duo')return 24;
 if(m.mode==='Squad')return 12;
+if(m.mode==='Team Duo')return 4;
+if(m.mode==='Team Squad')return 8;
+if(m.mode==='Team 6')return 12;
 return 48;
+}
+
+function getTeamSize(m){
+if(m.mode==='Team Duo')return 2;
+if(m.mode==='Team Squad')return 4;
+if(m.mode==='Team 6')return 6;
+return 0;
+}
+
+function isTeam(m){
+var mode=m.mode||'';
+return mode==='Team Duo'||mode==='Team Squad'||mode==='Team 6';
 }
 
 function getMid(){
@@ -277,19 +343,27 @@ function render(){
 var m=currentMatch;
 var bc=m.bannerUrl?'<img src="'+m.bannerUrl+'" onerror="this.style.display=\'none\'">':'<div class="bnp">GAME</div>';
 var rules=m.rules&&m.rules.trim()?'<div class="rb"><div class="rt">RULES AND REGULATIONS</div><div class="rx">'+m.rules+'</div></div>':'<div class="rb"><div class="rt">RULES AND REGULATIONS</div><div class="rx" style="color:#666">No rules specified for this match.</div></div>';
+
 var pz='';
 if(m.prizeType==='booyah'&&m.booyahPrize>0){
 pz='<div class="pz"><div class="pt">BOOYAH PRIZE</div><div class="pr"><span style="color:#ccc">Winner takes all</span><span class="pa">'+m.booyahPrize+' coins</span></div></div>';
 }else if(m.prizeType==='perkill'&&m.perKillPrize>0){
 pz='<div class="pz"><div class="pt">PER KILL PRIZE</div><div class="pr"><span style="color:#ccc">Per Kill</span><span class="pa">'+m.perKillPrize+' coins</span></div></div>';
 }
+
 var bc2=Object.keys(bookedSlots).length;
 var sc=bc2>=totalSlots?'#ff3131':'#00e676';
+
+var modeDisplay=m.mode||'Solo';
+if(isTeamMatch){
+modeDisplay=m.mode+' ('+teamSize+' vs '+teamSize+')';
+}
+
 var h='<div class="bn">'+bc+'<div class="sb">'+m.status+'</div></div>'+
 '<div class="mt">'+m.title+'</div>'+
 '<div class="mi">Match ID: #'+m.id.substring(0,8)+'</div>'+
 '<div class="ig">'+
-'<div class="ii"><div class="il">MODE</div><div class="iv">'+m.mode+'</div></div>'+
+'<div class="ii"><div class="il">MODE</div><div class="iv">'+modeDisplay+'</div></div>'+
 '<div class="ii"><div class="il">MAP</div><div class="iv">'+m.map+'</div></div>'+
 '<div class="ii"><div class="il">ENTRY FEE</div><div class="iv">'+m.entryFee+' coins</div></div>'+
 '<div class="ii"><div class="il">PRIZE POOL</div><div class="iv">'+m.prizePool+' coins</div></div>'+
@@ -297,6 +371,7 @@ var h='<div class="bn">'+bc+'<div class="sb">'+m.status+'</div></div>'+
 '<div class="ii"><div class="il">TIME</div><div class="iv">'+(m.time||'TBA')+'</div></div>'+
 '<div class="ii" style="grid-column:span 2"><div class="il">SLOTS FILLED</div><div class="iv" style="color:'+sc+'" id="scnt">'+bc2+' / '+totalSlots+'</div></div>'+
 '</div>'+pz+rules;
+
 document.getElementById('wrap').innerHTML=h;
 updateBtn();
 }
@@ -307,6 +382,7 @@ var b=document.getElementById('jb');
 var rb=document.getElementById('reportBtn');
 document.getElementById('jc').style.display='block';
 var c=Object.keys(bookedSlots).length;
+
 if(userSlot!==null){
 b.textContent='JOINED - YOUR SLOT #'+userSlot;
 b.className='jb joined';b.disabled=false;
@@ -349,6 +425,8 @@ if(!d.exists){showErr('Match not found!');return;}
 currentMatch=d.data();
 currentMatch.id=d.id;
 totalSlots=getSlots(currentMatch);
+isTeamMatch=isTeam(currentMatch);
+teamSize=getTeamSize(currentMatch);
 render();
 loadSlots();
 }).catch(function(e){showErr('Load failed: '+e.message);});
@@ -367,6 +445,29 @@ openSmo();
 
 function openSmo(){
 selectedSlot=null;
+selectedTeam=null;
+
+var normalSection=document.getElementById('normalSlotSection');
+var teamSection=document.getElementById('teamSlotSection');
+
+if(isTeamMatch){
+normalSection.style.display='none';
+teamSection.style.display='block';
+renderTeamSlots();
+}else{
+normalSection.style.display='block';
+teamSection.style.display='none';
+renderNormalSlots();
+}
+
+document.getElementById('pf').classList.remove('show');
+document.getElementById('ssi').innerHTML=isTeamMatch?'Tap a green slot to select':'Tap a green slot to select';
+document.getElementById('scb').textContent='SELECT A SLOT FIRST';
+document.getElementById('scb').disabled=true;
+document.getElementById('smo').classList.add('show');
+}
+
+function renderNormalSlots(){
 var g=document.getElementById('sg');
 g.innerHTML='';
 for(var i=1;i<=totalSlots;i++){
@@ -378,31 +479,88 @@ if(bookedSlots[i]){
 if(bookedSlots[i].userId===user.id){btn.classList.add('yours');}
 else{btn.classList.add('booked');btn.textContent='X';}
 }else{
-btn.onclick=(function(n){return function(){selSlot(n);};})(i);
+btn.onclick=(function(n){return function(){selSlot(n,'normal');};})(i);
 }
 g.appendChild(btn);
 }
-document.getElementById('pf').classList.remove('show');
-document.getElementById('ssi').innerHTML='Tap a green slot to select';
-document.getElementById('scb').textContent='SELECT A SLOT FIRST';
-document.getElementById('scb').disabled=true;
-document.getElementById('smo').classList.add('show');
 }
 
-function closeSmo(){
-document.getElementById('smo').classList.remove('show');
-selectedSlot=null;
+function renderTeamSlots(){
+var teamA=document.getElementById('teamAGrid');
+var teamB=document.getElementById('teamBGrid');
+teamA.innerHTML='';
+teamB.innerHTML='';
+
+// Set grid class based on team size
+var gridClass='';
+if(teamSize===4)gridClass='squad-grid';
+else if(teamSize===6)gridClass='six-grid';
+teamA.className='team-slots-grid '+gridClass;
+teamB.className='team-slots-grid '+gridClass;
+
+var aBooked=0,bBooked=0;
+
+// TEAM A slots: 1 to teamSize
+for(var i=1;i<=teamSize;i++){
+var btn=document.createElement('button');
+btn.className='team-slot';
+btn.setAttribute('data-slot',i);
+btn.innerHTML='<span class="slot-num">'+i+'</span><span class="slot-label">A</span>';
+if(bookedSlots[i]){
+aBooked++;
+if(bookedSlots[i].userId===user.id){btn.classList.add('yours');}
+else{btn.classList.add('booked');btn.innerHTML='<span class="slot-num">X</span><span class="slot-label">A</span>';}
+}else{
+btn.onclick=(function(n){return function(){selSlot(n,'A');};})(i);
+}
+teamA.appendChild(btn);
 }
 
-function selSlot(n){
+// TEAM B slots: teamSize+1 to teamSize*2
+var startB=teamSize+1;
+for(var j=startB;j<=teamSize*2;j++){
+var btnB=document.createElement('button');
+btnB.className='team-slot';
+btnB.setAttribute('data-slot',j);
+var displayNum=j-teamSize;
+btnB.innerHTML='<span class="slot-num">'+displayNum+'</span><span class="slot-label">B</span>';
+if(bookedSlots[j]){
+bBooked++;
+if(bookedSlots[j].userId===user.id){btnB.classList.add('yours');}
+else{btnB.classList.add('booked');btnB.innerHTML='<span class="slot-num">X</span><span class="slot-label">B</span>';}
+}else{
+btnB.onclick=(function(n){return function(){selSlot(n,'B');};})(j);
+}
+teamB.appendChild(btnB);
+}
+
+document.getElementById('teamACount').textContent=aBooked+' / '+teamSize;
+document.getElementById('teamBCount').textContent=bBooked+' / '+teamSize;
+}
+
+function selSlot(n,team){
 selectedSlot=n;
+selectedTeam=team||null;
+
+// Remove existing selected class
 document.querySelectorAll('.sbtn').forEach(function(e){e.classList.remove('selected');});
-var b=document.querySelector('.sbtn[data-slot="'+n+'"]');
+document.querySelectorAll('.team-slot').forEach(function(e){e.classList.remove('selected');});
+
+if(isTeamMatch){
+var b=document.querySelector('.team-slot[data-slot="'+n+'"]');
 if(b)b.classList.add('selected');
+}else{
+var b2=document.querySelector('.sbtn[data-slot="'+n+'"]');
+if(b2)b2.classList.add('selected');
+}
+
 document.getElementById('pf').classList.add('show');
-document.getElementById('ssi').innerHTML='Selected Slot: <b>#'+n+'</b> - Fill player details below';
-document.getElementById('scb').textContent='CONFIRM SLOT #'+n+' ('+currentMatch.entryFee+' Coins)';
+
+var teamLabel=isTeamMatch?(' (Team '+team+')'):'';
+document.getElementById('ssi').innerHTML='Selected Slot: <b>#'+n+teamLabel+'</b> - Fill player details below';
+document.getElementById('scb').textContent='CONFIRM SLOT #'+n+teamLabel+' ('+currentMatch.entryFee+' Coins)';
 document.getElementById('scb').disabled=false;
+
 var ign=document.getElementById('ffIgn');
 var rn=document.getElementById('realName');
 var mn=document.getElementById('mobileNum');
@@ -440,6 +598,7 @@ return;
 }
 var m=currentMatch;
 var n=selectedSlot;
+var team=selectedTeam;
 var ffIgn=document.getElementById('ffIgn').value.trim();
 var realName=document.getElementById('realName').value.trim();
 var mobileNum=document.getElementById('mobileNum').value.trim();
@@ -459,16 +618,20 @@ cb.disabled=false;cb.textContent='CONFIRM SLOT #'+n;
 return;
 }
 var nb=bal-m.entryFee;
-return db.collection('users').doc(user.id).update({balance:nb})
-.then(function(){
-return db.collection('matches').doc(m.id).collection('slots').doc(String(n)).set({
+var slotData={
 userId:user.id,
 userEmail:user.email,
 ffIgn:ffIgn,
 realName:realName,
 mobileNumber:mobileNum,
 joinedAt:new Date().toISOString()
-});
+};
+if(team)slotData.team=team;
+if(isTeamMatch)slotData.isTeamMatch=true;
+
+return db.collection('users').doc(user.id).update({balance:nb})
+.then(function(){
+return db.collection('matches').doc(m.id).collection('slots').doc(String(n)).set(slotData);
 })
 .then(function(){
 return db.collection('users').doc(user.id).update({
@@ -485,7 +648,8 @@ joinedPlayers:firebase.firestore.FieldValue.increment(1)
 return db.collection('transactions').add({
 userId:user.id,type:'match_entry',amount:m.entryFee,
 status:'completed',matchId:m.id,matchTitle:m.title,
-slotNumber:n,ffIgn:ffIgn,realName:realName,mobileNumber:mobileNum,
+slotNumber:n,team:team||'',
+ffIgn:ffIgn,realName:realName,mobileNumber:mobileNum,
 timestamp:new Date().toISOString()
 });
 })
@@ -493,16 +657,22 @@ timestamp:new Date().toISOString()
 user.balance=nb;
 try{localStorage.setItem('primeArenaUser',JSON.stringify(user));}catch(e){}
 userSlot=n;
-bookedSlots[n]={userId:user.id,ffIgn:ffIgn,realName:realName,mobileNumber:mobileNum};
+bookedSlots[n]={userId:user.id,ffIgn:ffIgn,realName:realName,mobileNumber:mobileNum,team:team};
 closeSmo();
 render();
-showToast('Slot #'+n+' booked successfully!');
+showToast('Slot #'+n+(team?' (Team '+team+')':'')+' booked!');
 });
 });
 }).catch(function(e){
 showPop('Error',e.message,null,false);
 cb.disabled=false;cb.textContent='CONFIRM SLOT #'+n;
 });
+}
+
+function closeSmo(){
+document.getElementById('smo').classList.remove('show');
+selectedSlot=null;
+selectedTeam=null;
 }
 
 // ============ REPORT FUNCTIONS ============
@@ -521,6 +691,7 @@ var s=bookedSlots[k];
 if(s.userId===user.id)return;
 hasOther=true;
 var label='Slot #'+k;
+if(s.team)label+=' (Team '+s.team+')';
 if(s.ffIgn) label+=' - '+s.ffIgn;
 else if(s.realName) label+=' - '+s.realName;
 var opt=document.createElement('option');
@@ -566,13 +737,8 @@ var maxH=400;
 var w=img.width;
 var h=img.height;
 if(w>maxW||h>maxH){
-if(w>h){
-h=Math.round(h*maxW/w);
-w=maxW;
-}else{
-w=Math.round(w*maxH/h);
-h=maxH;
-}
+if(w>h){h=Math.round(h*maxW/w);w=maxW;}
+else{w=Math.round(w*maxH/h);h=maxH;}
 }
 canvas.width=w;
 canvas.height=h;
@@ -635,6 +801,7 @@ reportedUserId:reportedPlayer.userId||'',
 reportedIgn:reportedPlayer.ffIgn||'',
 reportedName:reportedPlayer.realName||'',
 reportedMobile:reportedPlayer.mobileNumber||'',
+reportedTeam:reportedPlayer.team||'',
 reason:reason,
 details:details,
 videoLink:videoLink,
@@ -673,6 +840,5 @@ else{loadMatch();}
 }
 }catch(e){showErr('Startup error: '+e.message);}
 </script>
-  <script type="module" src="ban-check.js"></script>
 </body>
-</html>
+  </html>
